@@ -14,10 +14,11 @@ body {
   background-size: cover;
   font-family: "Inconsolata", Helvetica, sans-serif;
   font-size: 1.5rem;
-  color: rgba(255, 255, 255, 0.8);
-  text-shadow:
-    0 0 1ex rgba(255, 255, 255, 1),
-    0 0 2px rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  align-items: center;
+  line-height: 1;
 }
 
 .noise {
@@ -44,7 +45,7 @@ body {
     rgba(0, 0, 0, 0) 100%
   );
   background-size: auto 4px;
-  z-index: 1;
+  z-index: 5;
 }
 
 .overlay::before {
@@ -84,16 +85,24 @@ body {
   box-sizing: inherit;
   position: absolute;
   height: 100%;
-  width: 1000px;
+  width: 100ch;
   max-width: 100%;
   padding: 4rem;
   text-transform: uppercase;
+  overflow-y: auto;
 }
 
-.output {
+.terminal * {
   color: rgba(255, 255, 255, 0.8);
   text-shadow:
     0 0 1px rgba(255, 255, 255, 0.4),
+    0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.terminal h1 {
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow:
+    0 0 1ex rgba(255, 255, 255, 1),
     0 0 2px rgba(255, 255, 255, 0.8);
 }
 
@@ -101,7 +110,7 @@ body {
   content: "> ";
 }
 
-a {
+.terminal a {
   color: #ff7777;
   text-decoration: none;
   text-shadow:
@@ -119,4 +128,30 @@ a::after {
 
 .errorcode {
   color: white;
+}
+
+.terminal .ascii img {
+  float: right;
+  width: 50ch;
+  position: relative;
+  z-index: 3;
+}
+
+.terminal div.ascii {
+  position: relative;
+  z-index: 2;
+}
+
+.terminal .ascii div.content {
+  opacity: 1;
+  width: 50ch;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.terminal .ascii span {
+  z-index: 4;
+  position: relative;
+  background-color: #666;
 }
