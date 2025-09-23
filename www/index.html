@@ -3,42 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="code.js"></script>
-    <title>Damian Moser</title>
-    <link rel="stylesheet" href="monospace.css" type="text/css" />
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    <script src="terminal.js"></script>
+    <title>Damian Moser - Terminal</title>
     <link rel="stylesheet" href="reset.css" type="text/css" />
+    <link rel="stylesheet" href="monospace.css" type="text/css" />
     <link rel="stylesheet" href="style.css" type="text/css" />
   </head>
   <body>
     <div class="noise"></div>
     <div class="overlay"></div>
-    <h1>Damian Moser</h1>
-    <p class="output">whoami</p>
-    <p class="output">Software Engineer & Security Enthusiast</p>
-    <figure>
-      <img src="img/linux.jpg" alt="Default image" />
+    
+    <div id="terminal">
+      <div id="intro">
+        <span id="typed-intro"></span>
+      </div>
+      <div id="output"></div>
+      <div id="input-line" style="display: none;">
+        <span id="prompt">damian@portfolio:~$ </span>
+        <input type="text" id="command-input" autocomplete="off" spellcheck="false" />
+      </div>
+    </div>
+
+    <!-- Hidden image elements for the visual effects -->
+    <figure style="display: none;">
+      <img src="img/linux.jpg" alt="Terminal background" />
       <div class="shard" data-width="50" data-height="25">
-        <img src="img/linux.jpg" alt="Default image" />
+        <img src="img/linux.jpg" alt="Terminal background" />
         <img src="img/linux_cipher.jpg" alt="Cipher artifact" />
-        <img src="img/linux_cipher_cbc.jpg" alt="CBC artifact" />
       </div>
     </figure>
-    <p class="output">Welcome to my digital space</p>
-    <p class="output">Ready to explore?</p>
-    <figure>
-      <img
-        src="https://owickstrom.github.io/the-monospace-web/demo/castle.jpg"
-        alt="Default image"
-      />
-    </figure>
-    <figure>
-      <img src="img/linux.jpg" alt="Default image" />
-      <div class="shard" data-width="50" data-height="25">
-        <img src="img/linux.jpg" alt="Default image" />
-        <img src="img/linux_cipher.jpg" alt="Cipher artifact" />
-        <img src="img/linux_cipher_cbc.jpg" alt="CBC artifact" />
-      </div>
-    </figure>
-    <div class="terminal"></div>
   </body>
 </html>
