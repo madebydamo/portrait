@@ -110,3 +110,33 @@ div.shard {
   z-index: 10;
   margin: 0;
 }
+
+#output .output {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+#output .output.error {
+  color: #ff6b6b;
+}
+
+.prompt {
+  color: #4ecdc4;
+  font-weight: bold;
+}
+#input-line {
+  display: flex;
+  align-items: center;
+}
+
+#command-input {
+  background: transparent;
+  border: none;
+  color: inherit;
+  flex: 1;
+  font: inherit;
+  height: calc(var(--line-height));
+  outline: none;
+  padding: 0 calc(1ch);
+  width: auto;
+}
