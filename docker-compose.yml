@@ -1,5 +1,6 @@
 services:
   portrait-server:
+    hostname: portrait
     build: .
     ports:
       - "8000:8000"

@@ -22,17 +22,19 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 # Create a non-root user
 RUN useradd -r -s /bin/false damo
 
+RUN mkdir -p /home/damo
+
 # Set the working directory
-WORKDIR /app
+WORKDIR /home/damo
 
 # Copy the built binary from the builder stage
-COPY --from=builder /app/target/release/server /app/server
+COPY --from=builder /app/target/release/server /home/damo/server
 
 # Copy the www directory
 COPY www ./www
 
 # Change ownership to the non-root user
-RUN chown -R damo:damo /app
+RUN chown -R damo:damo /home/damo
 
 # Switch to the non-root user
 USER damo
