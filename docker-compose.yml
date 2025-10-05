@@ -1,0 +1,8 @@
+services:
+  portrait-server:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./www:/app/www
+    restart: unless-stopped
