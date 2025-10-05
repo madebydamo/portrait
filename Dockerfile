@@ -14,14 +14,27 @@ COPY server/src ./src
 RUN cargo build --release
 
 # Use a minimal base image for the final stage
-FROM ubuntu:24.04
+FROM ubuntu:24.04 as sandbox
 
-# Install necessary dependencies (if any, like ca-certificates for HTTPS)
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# Install necessary dependencies, sandbox tools, and fun packages
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    bubblewrap \
+    util-linux \
+    coreutils \
+    cowsay \
+    curl \
+    fortune-mod \
+    figlet \
+    toilet \
+    lolcat \
+    ping \
+    sl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
-RUN useradd -r -s /bin/false damo
-
+ENV PATH="/usr/games:$PATH"
+# Create a non-root user with fixed UID/GID
+RUN useradd -r -u 999 -s /bin/false damo
 RUN mkdir -p /home/damo
 
 # Set the working directory
@@ -33,14 +46,12 @@ COPY --from=builder /app/target/release/server /home/damo/server
 # Copy the www directory
 COPY www ./www
 
-# Change ownership to the non-root user
-RUN chown -R damo:damo /home/damo
-
-# Switch to the non-root user
-USER damo
+# Change ownership to root to prevent modifications/deletions by damo
+RUN chown -R damo:damo /home/damo && \
+    chmod -R go-w /home/damo  # Remove write perms for group/other (redundant but explicit)
 
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Run the application
+# Run the application as root
 CMD ["./server"]

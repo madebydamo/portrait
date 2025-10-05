@@ -2,7 +2,6 @@ use rocket::fs::{relative, FileServer};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{get, launch, post, routes};
 use std::process::Stdio;
-use tokio::process::Command;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -22,14 +21,30 @@ struct CommandResponse {
 async fn execute_command(
     req: rocket::serde::json::Json<CommandRequest>,
 ) -> rocket::serde::json::Json<CommandResponse> {
-    let output = match Command::new("sh")
-        .arg("-c")
-        .arg(&req.command)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output()
-        .await
-    {
+    let mut cmd = tokio::process::Command::new("prlimit");
+    cmd.arg("--cpu=5");
+    cmd.arg("--as=100000000");
+    cmd.arg("timeout");
+    cmd.arg("5s");
+    cmd.arg("bwrap");
+    cmd.arg("--unshare-user");
+    cmd.arg("--ro-bind").arg("/").arg("/");
+    cmd.arg("--dev-bind").arg("/dev").arg("/dev");
+    cmd.arg("--proc").arg("/proc");
+    cmd.arg("--new-session");
+    cmd.arg("--die-with-parent");
+    cmd.arg("--uid").arg("999");
+    cmd.arg("--gid").arg("999");
+    cmd.arg("--chdir").arg("/home/damo");
+    cmd.arg("--");
+    cmd.arg("/bin/sh");
+    cmd.arg("-c");
+    cmd.arg(&req.command);
+
+    cmd.stdout(Stdio::piped());
+    cmd.stderr(Stdio::piped());
+
+    let output = match cmd.output().await {
         Ok(o) => o,
         Err(_) => {
             return rocket::serde::json::Json(CommandResponse {

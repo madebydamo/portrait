@@ -6,4 +6,8 @@ services:
       - "8000:8000"
     volumes:
       - ./www:/app/www
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
     restart: unless-stopped
