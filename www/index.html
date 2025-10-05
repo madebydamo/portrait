@@ -13,20 +13,26 @@
   <body>
     <div class="noise"></div>
     <div class="overlay"></div>
-    
+
     <div id="terminal">
       <div id="intro">
         <span id="typed-intro"></span>
       </div>
       <div id="output"></div>
-      <div id="input-line" style="display: none;">
+      <div id="input-line" style="display: none">
         <span id="prompt">damian@portfolio:~$ </span>
-        <input type="text" id="command-input" autocomplete="off" spellcheck="false" />
+        <input
+          type="text"
+          id="command-input"
+          autocomplete="off"
+          spellcheck="false"
+          style="border: none; width: auto"
+        />
       </div>
     </div>
 
     <!-- Hidden image elements for the visual effects -->
-    <figure style="display: none;">
+    <figure style="display: none">
       <img src="img/linux.jpg" alt="Terminal background" />
       <div class="shard" data-width="50" data-height="25">
         <img src="img/linux.jpg" alt="Terminal background" />
