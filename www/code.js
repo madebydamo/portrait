@@ -3,7 +3,8 @@ window.addEventListener("load", () => {
   setTimeout(shardify, 1000);
 });
 
-function shardify() {
+// Make shardify globally available for HTML onload attributes
+window.shardify = function shardify() {
   const shardContainers = document.querySelectorAll(".shard");
 
   shardContainers.forEach((shardContainer) => {
