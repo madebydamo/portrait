@@ -1,6 +1,6 @@
 use rocket::fs::{relative, FileServer};
 use rocket::serde::{Deserialize, Serialize};
-use rocket::{launch, post, routes};
+use rocket::{get, launch, post, routes};
 use std::process::Stdio;
 use tokio::process::Command;
 
@@ -51,6 +51,24 @@ async fn execute_command(
     })
 }
 
+#[get("/commands")]
+fn get_commands() -> rocket::serde::json::Json<Vec<String>> {
+    let mut commands = Vec::new();
+    if let Ok(entries) = std::fs::read_dir("./www/commands") {
+        for entry in entries {
+            if let Ok(entry) = entry {
+                if let Some(filename) = entry.file_name().to_str() {
+                    if filename.ends_with(".html") {
+                        let command = filename.trim_end_matches(".html").to_string();
+                        commands.push(command);
+                    }
+                }
+            }
+        }
+    }
+    rocket::serde::json::Json(commands)
+}
+
 #[launch]
 fn rocket() -> _ {
     let config = rocket::config::Config {
@@ -61,5 +79,5 @@ fn rocket() -> _ {
     rocket::build()
         .configure(config)
         .mount("/", FileServer::from(relative!("./www")).rank(1))
-        .mount("/", routes![execute_command])
+        .mount("/", routes![execute_command, get_commands])
 }

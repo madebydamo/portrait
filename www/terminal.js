@@ -5,17 +5,28 @@ class Terminal {
     this.inputLine = document.getElementById("input-line");
     this.commandHistory = [];
     this.historyIndex = -1;
+    this.availableCommands = [];
 
     this.init();
   }
 
-  init() {
+  async init() {
     // Start with intro animation
     this.startIntroAnimation();
 
     // Set up input handling
     this.input.addEventListener("keydown", (e) => this.handleKeyDown(e));
     this.input.addEventListener("keyup", (e) => this.handleKeyUp(e));
+
+    // Fetch available commands
+    try {
+      const response = await fetch("/commands");
+      if (response.ok) {
+        this.availableCommands = await response.json();
+      }
+    } catch (error) {
+      console.error("Failed to fetch available commands:", error);
+    }
   }
 
   startIntroAnimation() {
@@ -29,7 +40,7 @@ class Terminal {
 
     new Typed("#typed-intro", {
       strings: introText,
-      typeSpeed: 50,
+      typeSpeed: 20,
       backSpeed: 0,
       fadeOut: false,
       loop: false,
@@ -118,40 +129,64 @@ class Terminal {
   }
 
   async loadCommand(command) {
-    try {
-      const response = await fetch("/execute", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ command: command }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const commandOutput = document.createElement("div");
-
-        if (data.stdout) {
-          commandOutput.innerHTML = `<pre class="output">${data.stdout}</pre>`;
+    // Check if command is available in the commands directory
+    if (this.availableCommands.includes(command)) {
+      try {
+        // Load HTML content from commands directory
+        const htmlResponse = await fetch(`/commands/${command}.html`);
+        if (htmlResponse.ok) {
+          const htmlContent = await htmlResponse.text();
+          const commandOutput = document.createElement("div");
+          commandOutput.innerHTML = htmlContent;
+          this.output.appendChild(commandOutput);
+        } else {
+          // This shouldn't happen if the command is in availableCommands, but fallback just in case
+          const errorOutput = document.createElement("div");
+          errorOutput.innerHTML = `<p class="output">Error loading command: ${command}</p>`;
+          this.output.appendChild(errorOutput);
         }
-
-        if (data.stderr) {
-          const stderrDiv = document.createElement("div");
-          stderrDiv.innerHTML = `<pre class="output error">${data.stderr}</pre>`;
-          commandOutput.appendChild(stderrDiv);
-        }
-
-        this.output.appendChild(commandOutput);
-      } else {
-        // Command not found or error
+      } catch (error) {
         const errorOutput = document.createElement("div");
-        errorOutput.innerHTML = `<p class="output">bash: ${command}: command not found</p>`;
+        errorOutput.innerHTML = `<p class="output">Error loading command: ${error.message}</p>`;
         this.output.appendChild(errorOutput);
       }
-    } catch (error) {
-      const errorOutput = document.createElement("div");
-      errorOutput.innerHTML = `<p class="output">Error executing command: ${error.message}</p>`;
-      this.output.appendChild(errorOutput);
+    } else {
+      // Command not in available commands - try executing as shell command
+      try {
+        const response = await fetch("/execute", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ command: command }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const commandOutput = document.createElement("div");
+
+          if (data.stdout) {
+            commandOutput.innerHTML = `<pre class="output">${data.stdout}</pre>`;
+          }
+
+          if (data.stderr) {
+            const stderrDiv = document.createElement("div");
+            stderrDiv.innerHTML = `<pre class="output error">${data.stderr}</pre>`;
+            commandOutput.appendChild(stderrDiv);
+          }
+
+          this.output.appendChild(commandOutput);
+        } else {
+          // Command not found or error
+          const errorOutput = document.createElement("div");
+          errorOutput.innerHTML = `<p class="output">bash: ${command}: command not found</p>`;
+          this.output.appendChild(errorOutput);
+        }
+      } catch (error) {
+        const errorOutput = document.createElement("div");
+        errorOutput.innerHTML = `<p class="output">Error executing command: ${error.message}</p>`;
+        this.output.appendChild(errorOutput);
+      }
     }
 
     // Show prompt again after command execution
