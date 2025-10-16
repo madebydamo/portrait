@@ -140,3 +140,7 @@ div.shard {
   padding: 0 calc(1ch);
   width: auto;
 }
+
+* + * {
+  margin-top: 0;
+}
