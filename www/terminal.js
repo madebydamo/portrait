@@ -31,23 +31,22 @@ class Terminal {
 
   startIntroAnimation() {
     const introText = [
-      "Welcome to Damian's Portfolio Terminal",
-      "Initializing secure connection...",
-      "Connection established.",
-      "",
+      "Welcome to my Portfolio Website^5",
+      "Welcome to my Portfolio Terminal^500",
+      "Connecting...^1000",
       "Type 'help' to see available commands.",
     ];
 
     new Typed("#typed-intro", {
       strings: introText,
-      typeSpeed: 20,
-      backSpeed: 0,
+      typeSpeed: 10,
+      backSpeed: 7,
       fadeOut: false,
+      smartBackspace: true,
       loop: false,
       showCursor: true,
       cursorChar: "_",
       onComplete: () => {
-        // Show help command automatically after intro
         setTimeout(() => {
           this.showCommand("help");
           setTimeout(() => {
