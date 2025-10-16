@@ -28,7 +28,6 @@ RUN apt-get update && apt-get install -y \
     figlet \
     toilet \
     lolcat \
-    ping \
     sl && \
     rm -rf /var/lib/apt/lists/*
 
