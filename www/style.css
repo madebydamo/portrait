@@ -144,3 +144,11 @@ div.shard {
 * + * {
   margin-top: 0;
 }
+
+iframe {
+  display: block;
+  width: 100%;
+  object-fit: contain;
+  overflow: hidden;
+  height: calc(var(--line-height) * 40);
+}

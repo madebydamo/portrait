@@ -123,8 +123,53 @@ class Terminal {
       return;
     }
 
+    // Handle projects subcommands
+    if (command.startsWith("projects ")) {
+      const parts = command.split(" ");
+      if (parts.length === 2) {
+        const subcommand = parts[1];
+        this.loadProjectSubcommand(subcommand);
+        return;
+      }
+    }
+
     // Load command from commands directory
     this.loadCommand(command);
+  }
+
+  async loadProjectSubcommand(subcommand) {
+    const validSubcommands = ["rubiks", "uttt", "mandelbrot"];
+
+    if (validSubcommands.includes(subcommand)) {
+      try {
+        // Load HTML content from commands directory
+        const htmlResponse = await fetch(`/commands/${subcommand}.html`);
+        if (htmlResponse.ok) {
+          const htmlContent = await htmlResponse.text();
+          const commandOutput = document.createElement("div");
+          commandOutput.innerHTML = htmlContent;
+          this.output.appendChild(commandOutput);
+        } else {
+          const errorOutput = document.createElement("div");
+          errorOutput.innerHTML = `<p class="output">Error loading project: ${subcommand}</p>`;
+          this.output.appendChild(errorOutput);
+        }
+      } catch (error) {
+        const errorOutput = document.createElement("div");
+        errorOutput.innerHTML = `<p class="output">Error loading project: ${error.message}</p>`;
+        this.output.appendChild(errorOutput);
+      }
+    } else {
+      const errorOutput = document.createElement("div");
+      errorOutput.innerHTML = `<p class="output">Unknown project: ${subcommand}. Available projects: rubiks, uttt, mandelbrot</p>`;
+      this.output.appendChild(errorOutput);
+    }
+
+    // Show prompt again after command execution
+    setTimeout(() => {
+      this.showPrompt();
+      this.scrollToBottom();
+    }, 100);
   }
 
   async loadCommand(command) {
