@@ -152,3 +152,16 @@ iframe {
   overflow: hidden;
   height: calc(var(--line-height) * 40);
 }
+
+.clickable-command {
+  color: #4ecdc4;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(78, 205, 196, 0.5);
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.clickable-command:hover {
+  color: #26a69a;
+  text-decoration-color: rgba(38, 166, 154, 0.8);
+}

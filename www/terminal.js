@@ -27,6 +27,49 @@ class Terminal {
     } catch (error) {
       console.error("Failed to fetch available commands:", error);
     }
+
+    // Set up clickable command functionality
+    this.setupClickableCommands();
+  }
+
+  setupClickableCommands() {
+    // Add event listeners for clickable commands
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('clickable-command')) {
+        const command = e.target.getAttribute('data-command');
+        if (command) {
+          this.executeClickableCommand(command);
+        }
+      }
+    });
+  }
+
+  executeClickableCommand(command) {
+    // Simulate typing the command like the initial help
+    this.showCommand(command);
+    this.inputLine.style.display = "none";
+
+    // Execute the command after a short delay (skip the command display since we already did it)
+    setTimeout(() => {
+      // Handle special commands
+      if (command === "clear") {
+        this.clearTerminal();
+        return;
+      }
+
+      // Handle projects subcommands
+      if (command.startsWith("projects ")) {
+        const parts = command.split(" ");
+        if (parts.length === 2) {
+          const subcommand = parts[1];
+          this.loadProjectSubcommand(subcommand);
+          return;
+        }
+      }
+
+      // Load command from commands directory
+      this.loadCommand(command);
+    }, 500);
   }
 
   startIntroAnimation() {
