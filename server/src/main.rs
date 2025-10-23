@@ -40,7 +40,7 @@ async fn execute_command(
     cmd.arg("--gid").arg("999");
     cmd.arg("--chdir").arg("/home/damo");
     cmd.arg("--");
-    cmd.arg("/bin/sh");
+    cmd.arg("/bin/bash");
     cmd.arg("-c");
     cmd.arg(&req.command);
     cmd.stdout(Stdio::piped());
