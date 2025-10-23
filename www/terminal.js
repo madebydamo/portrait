@@ -18,6 +18,9 @@ class Terminal {
     this.input.addEventListener("keydown", (e) => this.handleKeyDown(e));
     this.input.addEventListener("keyup", (e) => this.handleKeyUp(e));
 
+    // Set up permanent focus on input
+    this.setupPermanentFocus();
+
     // Fetch available commands
     try {
       const response = await fetch("/commands");
@@ -34,14 +37,67 @@ class Terminal {
 
   setupClickableCommands() {
     // Add event listeners for clickable commands
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('clickable-command')) {
-        const command = e.target.getAttribute('data-command');
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("clickable-command")) {
+        const command = e.target.getAttribute("data-command");
         if (command) {
           this.executeClickableCommand(command);
         }
       }
     });
+  }
+
+  setupPermanentFocus() {
+    // Prevent losing focus by intercepting all focus events
+    document.addEventListener("focusin", (e) => {
+      // If input line is visible and focus is not on the input, force it back
+      if (this.inputLine.style.display !== "none" && e.target !== this.input) {
+        // Small delay to allow the event to complete before refocusing
+        setTimeout(() => {
+          if (this.inputLine.style.display !== "none") {
+            this.input.focus();
+          }
+        }, 0);
+      }
+    });
+
+    // Handle clicks anywhere on the document
+    document.addEventListener("click", (e) => {
+      // If input line is visible, ensure input stays focused
+      if (this.inputLine.style.display !== "none") {
+        setTimeout(() => {
+          if (this.inputLine.style.display !== "none") {
+            this.input.focus();
+          }
+        }, 0);
+      }
+    });
+
+    // Handle mousedown to prevent focus loss before click events
+    document.addEventListener("mousedown", (e) => {
+      // Allow interaction with the input itself
+      if (e.target === this.input || this.input.contains(e.target)) {
+        return;
+      }
+      // For any other interaction when input is visible, keep focus on input
+      if (this.inputLine.style.display !== "none") {
+        setTimeout(() => {
+          if (this.inputLine.style.display !== "none") {
+            this.input.focus();
+          }
+        }, 0);
+      }
+    });
+
+    // Additional safeguard: periodically check focus when input should be focused
+    setInterval(() => {
+      if (
+        this.inputLine.style.display !== "none" &&
+        document.activeElement !== this.input
+      ) {
+        this.input.focus();
+      }
+    }, 1000);
   }
 
   executeClickableCommand(command) {
@@ -94,6 +150,12 @@ class Terminal {
           this.showCommand("help");
           setTimeout(() => {
             this.loadCommand("help");
+            // Ensure input gets focus after intro completes
+            setTimeout(() => {
+              if (this.inputLine.style.display !== "none") {
+                this.input.focus();
+              }
+            }, 200);
           }, 500);
         }, 1000);
       },
@@ -108,7 +170,7 @@ class Terminal {
 
   showPrompt() {
     this.inputLine.style.display = "";
-    this.input.focus();
+    setTimeout(() => this.input.focus(), 0);
   }
 
   handleKeyDown(e) {
