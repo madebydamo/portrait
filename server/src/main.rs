@@ -2,6 +2,10 @@ use rocket::fs::{relative, FileServer};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{get, launch, post, routes};
 use std::process::Stdio;
+use std::time::Duration;
+use tokio::io::AsyncReadExt;
+use tokio::task;
+use tokio::time::timeout;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -24,13 +28,12 @@ async fn execute_command(
     let mut cmd = tokio::process::Command::new("prlimit");
     cmd.arg("--cpu=5");
     cmd.arg("--as=100000000");
-    cmd.arg("timeout");
-    cmd.arg("5s");
     cmd.arg("bwrap");
     cmd.arg("--unshare-user");
     cmd.arg("--ro-bind").arg("/").arg("/");
     cmd.arg("--dev-bind").arg("/dev").arg("/dev");
-    cmd.arg("--proc").arg("/proc");
+    cmd.arg("--unshare-pid");
+    cmd.arg("--bind").arg("/proc").arg("/proc");
     cmd.arg("--new-session");
     cmd.arg("--die-with-parent");
     cmd.arg("--uid").arg("999");
@@ -40,24 +43,51 @@ async fn execute_command(
     cmd.arg("/bin/sh");
     cmd.arg("-c");
     cmd.arg(&req.command);
-
     cmd.stdout(Stdio::piped());
     cmd.stderr(Stdio::piped());
 
-    let output = match cmd.output().await {
-        Ok(o) => o,
+    let mut child = match cmd.spawn() {
+        Ok(c) => c,
         Err(_) => {
             return rocket::serde::json::Json(CommandResponse {
                 stdout: "".to_string(),
-                stderr: "Failed to execute command".to_string(),
+                stderr: "Failed to spawn command".to_string(),
                 status: -1,
             });
         }
     };
 
-    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-    let status = output.status.code().unwrap_or(-1);
+    let mut stdout_reader = child.stdout.take().expect("stdout piped");
+    let mut stderr_reader = child.stderr.take().expect("stderr piped");
+
+    let stdout_task = task::spawn(async move {
+        let mut buf = Vec::new();
+        let _ = stdout_reader.read_to_end(&mut buf).await;
+        String::from_utf8_lossy(&buf).to_string()
+    });
+
+    let stderr_task = task::spawn(async move {
+        let mut buf = Vec::new();
+        let _ = stderr_reader.read_to_end(&mut buf).await;
+        String::from_utf8_lossy(&buf).to_string()
+    });
+
+    let wait_result = timeout(Duration::from_secs(5), child.wait()).await;
+
+    let (stdout, stderr, status) = match wait_result {
+        Ok(Ok(exit_status)) => (
+            stdout_task.await.unwrap_or_default(),
+            stderr_task.await.unwrap_or_default(),
+            exit_status.code().unwrap_or(-1),
+        ),
+        Ok(Err(_)) | Err(_) => {
+            let _ = child.kill().await;
+            let _ = child.wait().await;
+            stdout_task.abort();
+            stderr_task.abort();
+            ("".to_string(), "Command timed out".to_string(), -1)
+        }
+    };
 
     rocket::serde::json::Json(CommandResponse {
         stdout,
