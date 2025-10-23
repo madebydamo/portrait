@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y \
     fortune-mod \
     figlet \
     toilet \
+    bash-completion \
     lolcat \
     sl && \
     rm -rf /var/lib/apt/lists/*

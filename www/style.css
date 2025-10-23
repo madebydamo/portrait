@@ -158,7 +158,9 @@ iframe {
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: rgba(78, 205, 196, 0.5);
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
 }
 
 .clickable-command:hover {
