@@ -1,10 +1,10 @@
 // Intro animation methods for Terminal class
 
-Terminal.prototype.startIntroAnimation = function() {
+Terminal.prototype.startIntroAnimation = function () {
   const introText = [
+    "Connecting...^1000",
     "Welcome to my Portfolio Website^5",
     "Welcome to my Portfolio Terminal^500",
-    "Connecting...^1000",
     "Type 'help' to see available commands.",
   ];
 
@@ -34,7 +34,7 @@ Terminal.prototype.startIntroAnimation = function() {
   });
 };
 
-Terminal.prototype.showCommand = function(command) {
+Terminal.prototype.showCommand = function (command) {
   const commandLine = document.createElement("div");
   commandLine.innerHTML = `<span class="prompt">damo@portfolio:~$ </span>${command}`;
   this.output.appendChild(commandLine);
