@@ -40,9 +40,11 @@ async fn execute_command(
     cmd.arg("--gid").arg("999");
     cmd.arg("--chdir").arg("/home/damo");
     cmd.arg("--");
-    cmd.arg("/bin/bash");
+    cmd.arg("script");
+    cmd.arg("-q");
     cmd.arg("-c");
-    cmd.arg(&req.command);
+    cmd.arg(format!("stdbuf -o0 bash -c \"{}\"", &req.command));
+    cmd.arg("/dev/null");
     cmd.stdout(Stdio::piped());
     cmd.stderr(Stdio::piped());
 

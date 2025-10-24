@@ -97,12 +97,12 @@ Terminal.prototype.loadCommand = async function(command) {
         const commandOutput = document.createElement("div");
 
         if (data.stdout) {
-          commandOutput.innerHTML = `<pre class="output">${data.stdout}</pre>`;
+          commandOutput.innerHTML = `<pre class="output">${ansiToHtml(data.stdout)}</pre>`;
         }
 
         if (data.stderr) {
           const stderrDiv = document.createElement("div");
-          stderrDiv.innerHTML = `<pre class="output error">${data.stderr}</pre>`;
+          stderrDiv.innerHTML = `<pre class="output error">${ansiToHtml(data.stderr)}</pre>`;
           commandOutput.appendChild(stderrDiv);
         }
 
