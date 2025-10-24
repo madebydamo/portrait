@@ -1,6 +1,6 @@
 // Tab completion methods for Terminal class
 
-Terminal.prototype.handleTabCompletion = async function() {
+Terminal.prototype.handleTabCompletion = async function () {
   const currentInput = this.input.value;
   const cursorPosition = this.input.selectionStart;
 
@@ -44,16 +44,16 @@ Terminal.prototype.handleTabCompletion = async function() {
           data.stdout
             .trim()
             .split("\n")
-            .filter((line) => line.trim()),
+            .map((line) => line.trim()),
         ),
       ];
 
       // For first word completion, add custom portfolio commands that match
       if (isFirstWord && this.availableCommands) {
-        const matchingCustomCommands = this.availableCommands.filter(cmd =>
-          cmd.startsWith(currentWord) && !completions.includes(cmd)
+        const matchingCustomCommands = this.availableCommands.filter(
+          (cmd) => cmd.startsWith(currentWord) && !completions.includes(cmd),
         );
-        completions = [...completions, ...matchingCustomCommands];
+        completions = [...new Set([...completions, ...matchingCustomCommands])];
       }
 
       if (completions.length === 0) {
@@ -77,6 +77,7 @@ Terminal.prototype.handleTabCompletion = async function() {
         );
       } else {
         // Multiple completions - show options
+        this.clearCompletionOptions();
         const maxCompletions = 10;
         let displayCompletions = completions.slice(0, maxCompletions);
         let overflowMessage = "";
@@ -116,7 +117,7 @@ Terminal.prototype.handleTabCompletion = async function() {
   }
 };
 
-Terminal.prototype.findCommonPrefix = function(strings) {
+Terminal.prototype.findCommonPrefix = function (strings) {
   if (strings.length === 0) return "";
   if (strings.length === 1) return strings[0];
 
@@ -130,6 +131,6 @@ Terminal.prototype.findCommonPrefix = function(strings) {
   return prefix;
 };
 
-Terminal.prototype.clearCompletionOptions = function() {
+Terminal.prototype.clearCompletionOptions = function () {
   this.completionContainer.innerHTML = "";
 };
