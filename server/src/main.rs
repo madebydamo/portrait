@@ -39,6 +39,8 @@ async fn execute_command(
     cmd.arg("--uid").arg("999");
     cmd.arg("--gid").arg("999");
     cmd.arg("--chdir").arg("/home/damo");
+    cmd.arg("--setenv").arg("HOME").arg("/home/damo");
+    cmd.arg("--setenv").arg("USER").arg("damo");
     cmd.arg("--");
     cmd.arg("script");
     cmd.arg("-q");
