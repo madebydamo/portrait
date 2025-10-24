@@ -16,6 +16,10 @@ Terminal.prototype.setupPermanentFocus = function() {
 
   // Handle clicks anywhere on the document
   document.addEventListener("click", (e) => {
+    // Do not focus if clicking on a clickable command
+    if (e.target.classList.contains("clickable-command")) {
+      return;
+    }
     // If input line is visible, ensure input stays focused
     if (this.inputLine.style.display !== "none") {
       setTimeout(() => {
@@ -26,10 +30,14 @@ Terminal.prototype.setupPermanentFocus = function() {
     }
   });
 
-  // Handle mousedown to prevent focus loss before click events
+// Handle mousedown to prevent focus loss before click events
   document.addEventListener("mousedown", (e) => {
     // Allow interaction with the input itself
     if (e.target === this.input || this.input.contains(e.target)) {
+      return;
+    }
+    // Allow interaction with clickable commands
+    if (e.target.classList.contains("clickable-command")) {
       return;
     }
     // For any other interaction when input is visible, keep focus on input
