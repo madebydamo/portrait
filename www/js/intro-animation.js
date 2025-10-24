@@ -15,7 +15,7 @@ Terminal.prototype.startIntroAnimation = function () {
     fadeOut: false,
     smartBackspace: true,
     loop: false,
-    showCursor: true,
+    showCursor: false,
     cursorChar: "_",
     onComplete: () => {
       setTimeout(() => {
