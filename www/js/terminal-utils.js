@@ -25,33 +25,33 @@ window.ansiToHtml = function (text) {
     if (n < 16) {
       // Basic colors (simplified)
       const basic = [
-        "black",
-        "red",
-        "lime",
-        "yellow",
-        "blue",
-        "magenta",
-        "cyan",
         "white",
-        "gray",
-        "#ff5555",
-        "#55ff55",
-        "#ffff55",
-        "#5555ff",
-        "#ff55ff",
-        "#55ffff",
+        "#ff6666",
+        "#66ff66",
+        "#ffff66",
+        "#6666ff",
+        "#ff66ff",
+        "#66ffff",
+        "white",
+        "#cccccc",
+        "#ff8888",
+        "#88ff88",
+        "#ffff88",
+        "#8888ff",
+        "#ff88ff",
+        "#88ffff",
         "white",
       ];
       return basic[n] || "white";
     } else if (n < 232) {
       // 6x6x6 color cube
-      const r = Math.floor((n - 16) / 36) * 51;
-      const g = Math.floor(((n - 16) % 36) / 6) * 51;
-      const b = ((n - 16) % 6) * 51;
+      const r = Math.min(255, Math.floor((n - 16) / 36) * 51 + 50);
+      const g = Math.min(255, Math.floor(((n - 16) % 36) / 6) * 51 + 50);
+      const b = Math.min(255, ((n - 16) % 6) * 51 + 25);
       return `rgb(${r}, ${g}, ${b})`;
     } else {
       // Grayscale
-      const gray = (n - 232) * 10 + 8;
+      const gray = Math.min(255, (n - 232) * 10 + 28);
       return `rgb(${gray}, ${gray}, ${gray})`;
     }
   }
