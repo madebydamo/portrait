@@ -2,7 +2,7 @@
 FROM rust:1.90 as builder
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /home/damo
 
 # Copy the Cargo.toml and Cargo.lock files
 COPY server/Cargo.toml server/Cargo.lock ./
@@ -41,7 +41,7 @@ RUN mkdir -p /home/damo
 WORKDIR /home/damo
 
 # Copy the built binary from the builder stage
-COPY --from=builder /app/target/release/server /home/damo/server
+COPY --from=builder /home/damo/target/release/server /home/damo/server
 
 # Copy the www directory
 COPY www ./www

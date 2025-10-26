@@ -1,11 +1,12 @@
 services:
   portrait-server:
+    image: portrait-server
     hostname: portrait
     build: .
     ports:
       - "8000:8000"
     volumes:
-      - ./www:/app/www
+      - ./www:/home/damo/www
     cap_add:
       - SYS_ADMIN
     security_opt:
