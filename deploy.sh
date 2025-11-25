@@ -20,7 +20,6 @@ echo "Recreating services on the remote server..."
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 cd /home/homeserver/docker
 docker pull $DOCKER_REPO:latest
-docker tag $DOCKER_REPO:latest portrait-server
 docker-compose up -d --remove-orphans
 EOF
 
