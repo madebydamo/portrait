@@ -1,6 +1,23 @@
 // Command execution methods for Terminal class
 
-Terminal.prototype.executeCommand = function(command) {
+Terminal.prototype.getTerminalWidthChars = function () {
+  const terminal = document.getElementById("terminal");
+  const style = getComputedStyle(terminal);
+  const fontSize = parseFloat(style.fontSize);
+  // Create a span to measure character width
+  const span = document.createElement("span");
+  span.textContent = "0";
+  span.style.font = style.font;
+  span.style.position = "absolute";
+  span.style.visibility = "hidden";
+  document.body.appendChild(span);
+  const charWidth = span.offsetWidth;
+  document.body.removeChild(span);
+  const widthPx = terminal.offsetWidth;
+  return Math.floor(widthPx / charWidth) - 4; //padding
+};
+
+Terminal.prototype.executeCommand = function (command) {
   this.showCommand(command);
   this.inputLine.style.display = "none";
 
@@ -24,7 +41,7 @@ Terminal.prototype.executeCommand = function(command) {
   this.loadCommand(command);
 };
 
-Terminal.prototype.loadProjectSubcommand = async function(subcommand) {
+Terminal.prototype.loadProjectSubcommand = async function (subcommand) {
   const validSubcommands = ["rubiks", "uttt", "mandelbrot", "homeserver"];
 
   if (validSubcommands.includes(subcommand)) {
@@ -59,7 +76,7 @@ Terminal.prototype.loadProjectSubcommand = async function(subcommand) {
   }, 100);
 };
 
-Terminal.prototype.loadCommand = async function(command) {
+Terminal.prototype.loadCommand = async function (command) {
   // Check if command is available in the commands directory
   if (this.availableCommands.includes(command)) {
     try {
@@ -89,7 +106,10 @@ Terminal.prototype.loadCommand = async function(command) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ command: command }),
+        body: JSON.stringify({
+          command: command,
+          width: this.getTerminalWidthChars(),
+        }),
       });
 
       if (response.ok) {
@@ -124,10 +144,11 @@ Terminal.prototype.loadCommand = async function(command) {
   setTimeout(() => {
     this.showPrompt();
     this.scrollToBottom();
+    this.resetInactivityTimer();
   }, 100);
 };
 
-Terminal.prototype.executeClickableCommand = function(command) {
+Terminal.prototype.executeClickableCommand = function (command) {
   // Simulate typing the command like the initial help
   this.showCommand(command);
   this.inputLine.style.display = "none";

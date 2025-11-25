@@ -11,6 +11,7 @@ use tokio::time::timeout;
 #[serde(crate = "rocket::serde")]
 struct CommandRequest {
     command: String,
+    width: Option<i32>,
 }
 
 #[derive(Serialize)]
@@ -41,6 +42,9 @@ async fn execute_command(
     cmd.arg("--chdir").arg("/home/damo");
     cmd.arg("--setenv").arg("HOME").arg("/home/damo");
     cmd.arg("--setenv").arg("USER").arg("damo");
+    if let Some(width) = req.width {
+        cmd.arg("--setenv").arg("COLUMNS").arg(width.to_string());
+    }
     cmd.arg("--");
     cmd.arg("script");
     cmd.arg("-q");
