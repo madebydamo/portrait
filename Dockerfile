@@ -18,21 +18,20 @@ FROM ubuntu:24.04 as sandbox
 
 # Install necessary dependencies, sandbox tools, and fun packages
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    bubblewrap \
-    util-linux \
-    coreutils \
-    cowsay \
-    curl \
-    fortune-mod \
-    figlet \
-    toilet \
-    bash-completion \
-    lolcat \
-    sl && \
-    rm -rf /var/lib/apt/lists/*
+  ca-certificates \
+  bubblewrap \
+  util-linux \
+  coreutils \
+  cowsay \
+  curl \
+  fortune-mod \
+  figlet \
+  toilet \
+  bash-completion \
+  lolcat \
+  sl && \
+  rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/usr/games:$PATH"
 # Create a non-root user with fixed UID/GID
 RUN useradd -r -u 999 -s /bin/false damo
 RUN mkdir -p /home/damo
@@ -48,6 +47,6 @@ COPY www ./www
 
 # Change ownership to root to prevent modifications/deletions by damo
 RUN chown -R damo:damo /home/damo && \
-    chmod -R go-w /home/damo  # Remove write perms for group/other (redundant but explicit)
+  chmod -R go-w /home/damo  # Remove write perms for group/other (redundant but explicit)
 
 CMD ["./server"]
