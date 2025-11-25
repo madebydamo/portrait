@@ -50,9 +50,4 @@ COPY www ./www
 RUN chown -R damo:damo /home/damo && \
     chmod -R go-w /home/damo  # Remove write perms for group/other (redundant but explicit)
 
-# Expose the port the app runs on
-EXPOSE 8000
-
-# Run the application as root
-ENV ROCKET_PORT=7999 
 CMD ["./server"]
