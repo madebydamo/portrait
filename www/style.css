@@ -153,7 +153,9 @@ iframe {
   height: calc(var(--line-height) * 40);
 }
 
-.clickable-command {
+.clickable-command,
+a:link,
+a:visited {
   color: #4ecdc4;
   cursor: pointer;
   text-decoration: underline;
@@ -163,7 +165,8 @@ iframe {
     text-decoration-color 0.2s ease;
 }
 
-.clickable-command:hover {
+.clickable-command:hover,
+a:hover {
   color: #26a69a;
   text-decoration-color: rgba(38, 166, 154, 0.8);
 }
