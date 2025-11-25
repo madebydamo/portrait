@@ -27,8 +27,8 @@ struct CommandResponse {
 async fn execute_command(
     req: rocket::serde::json::Json<CommandRequest>,
 ) -> rocket::serde::json::Json<CommandResponse> {
-    if req.command.starts_with("telegram send ") {
-        let message = req.command.strip_prefix("telegram send ").unwrap_or("").trim();
+    if req.command.starts_with("message ") {
+        let message = req.command.strip_prefix("message ").unwrap_or("").trim();
         if message.is_empty() {
             return rocket::serde::json::Json(CommandResponse {
                 stdout: "".to_string(),
