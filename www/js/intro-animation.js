@@ -5,7 +5,7 @@ Terminal.prototype.startIntroAnimation = function () {
     "Connecting...^1000",
     "Welcome to my Portfolio Website^5",
     "Welcome to my Portfolio Terminal^500",
-    "Type 'help' to see available commands.",
+    "Type help to see available commands.",
   ];
 
   new Typed("#typed-intro", {
@@ -18,13 +18,19 @@ Terminal.prototype.startIntroAnimation = function () {
     showCursor: false,
     cursorChar: "_",
     onComplete: () => {
-      setTimeout(() => {
-        this.showCommand("help");
-        setTimeout(() => {
-          this.loadCommand("help");
+      // Make 'help' clickable in the intro text
+      const typedIntro = document.getElementById("typed-intro");
+      typedIntro.innerHTML = typedIntro.innerHTML.replace(
+        "Type help to see available commands.",
+        'Type <span class="clickable-command" data-command="help">help</span> to see available commands.',
+      );
 
-        }, 500);
-      }, 1000);
+      setTimeout(() => {
+        this.showCommand("whoami");
+        setTimeout(() => {
+          this.loadCommand("whoami");
+        }, 100);
+      }, 300);
     },
   });
 };

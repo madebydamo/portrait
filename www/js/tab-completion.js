@@ -134,4 +134,6 @@ Terminal.prototype.findCommonPrefix = function (strings) {
 
 Terminal.prototype.clearCompletionOptions = function () {
   this.completionContainer.innerHTML = "";
+  // Also clear inactivity message if present
+  this.clearInactivityMessage();
 };

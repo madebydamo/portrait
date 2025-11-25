@@ -34,6 +34,9 @@ class Terminal {
     // Set up clickable command functionality
     this.setupClickableCommands();
 
+    // Initialize inactivity timer
+    this.initInactivityTimer();
+
     // Add click handler to input line to focus input
     this.inputLine.addEventListener("click", () => this.input.focus());
   }
