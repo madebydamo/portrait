@@ -22,12 +22,7 @@ Terminal.prototype.startIntroAnimation = function () {
         this.showCommand("help");
         setTimeout(() => {
           this.loadCommand("help");
-          // Ensure input gets focus after intro completes
-          setTimeout(() => {
-            if (this.inputLine.style.display !== "none") {
-              this.input.focus();
-            }
-          }, 200);
+
         }, 500);
       }, 1000);
     },
