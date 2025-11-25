@@ -120,13 +120,8 @@ fn get_commands() -> rocket::serde::json::Json<Vec<String>> {
 
 #[launch]
 fn rocket() -> _ {
-    let config = rocket::config::Config {
-        address: std::net::IpAddr::V4(std::net::Ipv4Addr::new(0, 0, 0, 0)),
-        ..rocket::config::Config::default()
-    };
-
     rocket::build()
-        .configure(config)
+        .configure(rocket::config::Config::figment())
         .mount("/", FileServer::from(relative!("./www")).rank(1))
         .mount("/", routes![execute_command, get_commands])
 }

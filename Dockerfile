@@ -54,4 +54,5 @@ RUN chown -R damo:damo /home/damo && \
 EXPOSE 8000
 
 # Run the application as root
+ENV ROCKET_PORT=7999 
 CMD ["./server"]
