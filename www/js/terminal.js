@@ -12,17 +12,7 @@ class Terminal {
   }
 
   async init() {
-    // Start with intro animation
-    this.startIntroAnimation();
-
-    // Set up input handling
-    this.input.addEventListener("keydown", (e) => this.handleKeyDown(e));
-    this.input.addEventListener("keyup", (e) => this.handleKeyUp(e));
-
-    window.addEventListener("scroll", () => this.handleScroll());
-    document.addEventListener("keydown", (e) => this.globalKeyDown(e));
-
-    // Fetch available commands
+    // Fetch available commands first
     try {
       const response = await fetch("/commands");
       if (response.ok) {
@@ -32,8 +22,20 @@ class Terminal {
       console.error("Failed to fetch available commands:", error);
     }
 
+    // Start with intro animation
+    this.startIntroAnimation();
+
+    // Set up input handling
+    this.input.addEventListener("keydown", (e) => this.handleKeyDown(e));
+    this.input.addEventListener("keyup", (e) => this.handleKeyUp(e));
+
+    document.addEventListener("keydown", (e) => this.globalKeyDown(e));
+
     // Set up clickable command functionality
     this.setupClickableCommands();
+
+    // Add click handler to input line to focus input
+    this.inputLine.addEventListener("click", () => this.input.focus());
   }
 
   showPrompt() {
@@ -44,19 +46,6 @@ class Terminal {
     window.scrollTo(0, document.body.scrollHeight);
   }
 
-  handleScroll() {
-    const threshold = 10;
-    const atBottom =
-      window.innerHeight + window.scrollY >=
-      document.body.scrollHeight - threshold;
-    if (this.inputLine.style.display !== "none") {
-      if (atBottom) {
-        this.input.focus();
-      } else {
-        this.input.blur();
-      }
-    }
-  }
 
   globalKeyDown(e) {
     if (this.inputLine.style.display === "none") return;
