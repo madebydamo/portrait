@@ -104,6 +104,8 @@ async fn execute_command(
     cmd.arg("--bind").arg("/proc").arg("/proc");
     cmd.arg("--new-session");
     cmd.arg("--die-with-parent");
+    cmd.arg("--clearenv");
+    cmd.arg("--setenv").arg("PATH").arg("/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
     cmd.arg("--uid").arg("999");
     cmd.arg("--gid").arg("999");
     cmd.arg("--chdir").arg("/home/damo");
