@@ -1,0 +1,58 @@
+<div class="message-container">
+  <h2>Send a Message</h2>
+  <p>Type your message below</p>
+  <textarea
+    class="message-input"
+    rows="1"
+    cols="50"
+    placeholder="Whats up, im listening..."
+  ></textarea
+  ><br /><br />
+  <button class="send-button">Send</button>
+  <div class="response"></div>
+  <script>
+    console.log("here");
+    const container = document.currentScript.parentElement;
+    const textarea = container.querySelector(".message-input");
+    const button = container.querySelector(".send-button");
+    const responseDiv = container.querySelector(".response");
+
+    textarea.addEventListener("input", function () {
+      this.style.height = "auto";
+      this.style.height = this.scrollHeight + "px";
+    });
+
+    button.addEventListener("click", async function () {
+      const message = textarea.value.trim();
+      if (!message) {
+        responseDiv.innerHTML =
+          '<p style="color: red;">Please enter a message.</p>';
+        return;
+      }
+      const command = "message " + message;
+      container.innerHTML = "<p>Sending message...</p>";
+      try {
+        const response = await fetch("/execute", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            command: command,
+            width: window.terminal.getTerminalWidthChars(),
+          }),
+        });
+        const data = await response.json();
+        if (data.status === 0) {
+          container.innerHTML = '<pre class="output">' + data.stdout + "</pre>";
+        } else {
+          container.innerHTML =
+            '<pre class="output error">' + data.stderr + "</pre>";
+        }
+      } catch (error) {
+        container.innerHTML =
+          '<p style="color: red;">Error: ' + error.message + "</p>";
+      }
+    });
+  </script>
+</div>

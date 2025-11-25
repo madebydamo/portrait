@@ -53,6 +53,7 @@ class Terminal {
   globalKeyDown(e) {
     if (this.inputLine.style.display === "none") return;
     if (document.activeElement === this.input) return;
+    if (document.activeElement.tagName === 'TEXTAREA') return;
 
     e.preventDefault();
     e.stopPropagation();
@@ -115,5 +116,5 @@ class Terminal {
 
 // Initialize terminal when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  new Terminal();
+  window.terminal = new Terminal();
 });

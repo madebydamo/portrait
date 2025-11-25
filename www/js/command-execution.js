@@ -53,6 +53,20 @@ Terminal.prototype.loadProjectSubcommand = async function (subcommand) {
         const commandOutput = document.createElement("div");
         commandOutput.innerHTML = htmlContent;
         this.output.appendChild(commandOutput);
+        // Execute any scripts in the loaded HTML
+        const scripts = commandOutput.querySelectorAll('script');
+        const container = commandOutput.querySelector('.message-container') || commandOutput.querySelector('div') || commandOutput;
+        scripts.forEach(script => {
+            if (script.src) {
+                const newScript = document.createElement('script');
+                newScript.src = script.src;
+                document.head.appendChild(newScript);
+            } else {
+                const scriptText = script.textContent.replace('const container = document.currentScript.parentElement;', '');
+                const scriptFunction = new Function('container', scriptText);
+                scriptFunction(container);
+            }
+        });
       } else {
         const errorOutput = document.createElement("div");
         errorOutput.innerHTML = `<p class="output">Error loading project: ${subcommand}</p>`;
@@ -87,6 +101,20 @@ Terminal.prototype.loadCommand = async function (command) {
         const commandOutput = document.createElement("div");
         commandOutput.innerHTML = htmlContent;
         this.output.appendChild(commandOutput);
+        // Execute any scripts in the loaded HTML
+        const scripts = commandOutput.querySelectorAll('script');
+        const container = commandOutput.querySelector('.message-container') || commandOutput.querySelector('div') || commandOutput;
+        scripts.forEach(script => {
+            if (script.src) {
+                const newScript = document.createElement('script');
+                newScript.src = script.src;
+                document.head.appendChild(newScript);
+            } else {
+                const scriptText = script.textContent.replace('const container = document.currentScript.parentElement;', '');
+                const scriptFunction = new Function('container', scriptText);
+                scriptFunction(container);
+            }
+        });
       } else {
         // This shouldn't happen if the command is in availableCommands, but fallback just in case
         const errorOutput = document.createElement("div");
