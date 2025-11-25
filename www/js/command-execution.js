@@ -25,7 +25,7 @@ Terminal.prototype.executeCommand = function(command) {
 };
 
 Terminal.prototype.loadProjectSubcommand = async function(subcommand) {
-  const validSubcommands = ["rubiks", "uttt", "mandelbrot"];
+  const validSubcommands = ["rubiks", "uttt", "mandelbrot", "homeserver"];
 
   if (validSubcommands.includes(subcommand)) {
     try {
@@ -48,7 +48,7 @@ Terminal.prototype.loadProjectSubcommand = async function(subcommand) {
     }
   } else {
     const errorOutput = document.createElement("div");
-    errorOutput.innerHTML = `<p class="output">Unknown project: ${subcommand}. Available projects: rubiks, uttt, mandelbrot</p>`;
+    errorOutput.innerHTML = `<p class="output">Unknown project: ${subcommand}. Available projects: rubiks, uttt, mandelbrot, homeserver</p>`;
     this.output.appendChild(errorOutput);
   }
 
