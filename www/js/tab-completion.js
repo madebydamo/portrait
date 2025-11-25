@@ -36,17 +36,18 @@ Terminal.prototype.handleTabCompletion = async function () {
       body: JSON.stringify({ command: completionCommand }),
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      // Filter out duplicates and empty lines
-      let completions = [
-        ...new Set(
-          data.stdout
-            .trim()
-            .split("\n")
-            .map((line) => line.trim()),
-        ),
-      ];
+      if (response.ok) {
+        const data = await response.json();
+        // Filter out duplicates and empty lines
+        let completions = [
+          ...new Set(
+            data.stdout
+              .trim()
+              .split("\n")
+              .map((line) => line.trim())
+              .filter((line) => line),
+          ),
+        ];
 
       // For first word completion, add custom portfolio commands that match
       if (isFirstWord && this.availableCommands) {
