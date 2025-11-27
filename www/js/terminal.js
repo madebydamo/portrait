@@ -46,14 +46,30 @@ class Terminal {
   }
 
   scrollToBottom() {
-    window.scrollTo(0, document.body.scrollHeight);
-  }
+    const prompts = document.querySelectorAll('.prompt');
+    const targetPrompt = prompts[prompts.length - 2]; // Second to last prompt (last command's prompt)
+    if (!targetPrompt) {
+      // Fallback if no previous prompt
+      window.scrollTo(0, document.body.scrollHeight);
+      return;
+    }
+    const targetTop = targetPrompt.offsetTop;
+    const viewportHeight = window.innerHeight;
+    const bodyHeight = document.body.scrollHeight;
 
+    if (targetTop + viewportHeight > bodyHeight) {
+      // Scrolling target to top would leave space below, so scroll to bottom
+      window.scrollTo(0, bodyHeight);
+    } else {
+      // Scroll to bring target to top
+      window.scrollTo(0, targetTop);
+    }
+  }
 
   globalKeyDown(e) {
     if (this.inputLine.style.display === "none") return;
     if (document.activeElement === this.input) return;
-    if (document.activeElement.tagName === 'TEXTAREA') return;
+    if (document.activeElement.tagName === "TEXTAREA") return;
 
     e.preventDefault();
     e.stopPropagation();
