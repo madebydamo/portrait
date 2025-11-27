@@ -51,6 +51,7 @@ Terminal.prototype.loadProjectSubcommand = async function (subcommand) {
       if (htmlResponse.ok) {
         const htmlContent = await htmlResponse.text();
         const commandOutput = document.createElement("div");
+        commandOutput.classList.add("output-container");
         commandOutput.innerHTML = htmlContent;
         this.output.appendChild(commandOutput);
         // Execute any scripts in the loaded HTML
@@ -69,16 +70,19 @@ Terminal.prototype.loadProjectSubcommand = async function (subcommand) {
         });
       } else {
         const errorOutput = document.createElement("div");
+        errorOutput.classList.add("output-container");
         errorOutput.innerHTML = `<p class="output">Error loading project: ${subcommand}</p>`;
         this.output.appendChild(errorOutput);
       }
     } catch (error) {
       const errorOutput = document.createElement("div");
+      errorOutput.classList.add("output-container");
       errorOutput.innerHTML = `<p class="output">Error loading project: ${error.message}</p>`;
       this.output.appendChild(errorOutput);
     }
   } else {
     const errorOutput = document.createElement("div");
+    errorOutput.classList.add("output-container");
     errorOutput.innerHTML = `<p class="output">Unknown project: ${subcommand}. Available projects: rubiks, uttt, mandelbrot, homeserver</p>`;
     this.output.appendChild(errorOutput);
   }
@@ -99,6 +103,7 @@ Terminal.prototype.loadCommand = async function (command) {
       if (htmlResponse.ok) {
         const htmlContent = await htmlResponse.text();
         const commandOutput = document.createElement("div");
+        commandOutput.classList.add("output-container");
         commandOutput.innerHTML = htmlContent;
         this.output.appendChild(commandOutput);
         // Execute any scripts in the loaded HTML
@@ -118,11 +123,13 @@ Terminal.prototype.loadCommand = async function (command) {
       } else {
         // This shouldn't happen if the command is in availableCommands, but fallback just in case
         const errorOutput = document.createElement("div");
+        errorOutput.classList.add("output-container");
         errorOutput.innerHTML = `<p class="output">Error loading command: ${command}</p>`;
         this.output.appendChild(errorOutput);
       }
     } catch (error) {
       const errorOutput = document.createElement("div");
+      errorOutput.classList.add("output-container");
       errorOutput.innerHTML = `<p class="output">Error loading command: ${error.message}</p>`;
       this.output.appendChild(errorOutput);
     }
@@ -143,6 +150,7 @@ Terminal.prototype.loadCommand = async function (command) {
       if (response.ok) {
         const data = await response.json();
         const commandOutput = document.createElement("div");
+        commandOutput.classList.add("output-container");
 
         if (data.stdout) {
           commandOutput.innerHTML = `<pre class="output">${ansiToHtml(data.stdout)}</pre>`;
@@ -158,11 +166,13 @@ Terminal.prototype.loadCommand = async function (command) {
       } else {
         // Command not found or error
         const errorOutput = document.createElement("div");
+        errorOutput.classList.add("output-container");
         errorOutput.innerHTML = `<p class="output">bash: ${command}: command not found</p>`;
         this.output.appendChild(errorOutput);
       }
     } catch (error) {
       const errorOutput = document.createElement("div");
+      errorOutput.classList.add("output-container");
       errorOutput.innerHTML = `<p class="output">Error executing command: ${error.message}</p>`;
       this.output.appendChild(errorOutput);
     }

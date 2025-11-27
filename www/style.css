@@ -111,9 +111,19 @@ div.shard {
   margin: 0;
 }
 
+.output-container {
+  overflow-x: auto;
+}
+
 #output .output {
+  min-width: 64ch;
   white-space: pre-wrap;
   word-wrap: break-word;
+  word-break: break-all;
+}
+
+#output .output span {
+  word-break: break-word;
 }
 
 #output .output.error {
