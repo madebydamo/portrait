@@ -163,16 +163,14 @@ window.shardify = function shardify() {
           const flickerShards =
             shardsWrapper.querySelectorAll(".flicker-shard");
           flickerShards.forEach((shard) => shard.remove());
+          startFlickering();
         },
-        getRandomInt(100, 300),
+        getRandomInt(100, 200),
       );
     }
 
     function startFlickering() {
-      setTimeout(flickerShards, getRandomInt(100, 300));
-      setTimeout(flickerShards, getRandomInt(200, 500));
-      setTimeout(flickerShards, getRandomInt(300, 700));
-      setTimeout(startFlickering, getRandomInt(1500, 3000));
+      setTimeout(flickerShards, getRandomInt(0, 800));
     }
 
     // Initialize the shards and start flickering
@@ -181,4 +179,4 @@ window.shardify = function shardify() {
       startFlickering();
     }
   });
-}
+};
