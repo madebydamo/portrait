@@ -1,3 +1,4 @@
+use reqwest::Client;
 use rocket::fs::{relative, FileServer};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{get, launch, post, routes};
@@ -6,7 +7,6 @@ use std::time::Duration;
 use tokio::io::AsyncReadExt;
 use tokio::task;
 use tokio::time::timeout;
-use reqwest::Client;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -76,7 +76,10 @@ async fn execute_command(
             }
             Ok(resp) => {
                 let status = resp.status();
-                let body = resp.text().await.unwrap_or_else(|_| "Failed to read response body".to_string());
+                let body = resp
+                    .text()
+                    .await
+                    .unwrap_or_else(|_| "Failed to read response body".to_string());
                 return rocket::serde::json::Json(CommandResponse {
                     stdout: "".to_string(),
                     stderr: format!("Error: Telegram API returned {} - {}", status, body),
@@ -105,7 +108,9 @@ async fn execute_command(
     cmd.arg("--new-session");
     cmd.arg("--die-with-parent");
     cmd.arg("--clearenv");
-    cmd.arg("--setenv").arg("PATH").arg("/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
+    cmd.arg("--setenv")
+        .arg("PATH")
+        .arg("/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
     cmd.arg("--uid").arg("999");
     cmd.arg("--gid").arg("999");
     cmd.arg("--chdir").arg("/home/damo");
@@ -149,7 +154,7 @@ async fn execute_command(
         String::from_utf8_lossy(&buf).to_string()
     });
 
-    let wait_result = timeout(Duration::from_secs(5), child.wait()).await;
+    let wait_result = timeout(Duration::from_secs(10), child.wait()).await;
 
     let (stdout, stderr, status) = match wait_result {
         Ok(Ok(exit_status)) => (
