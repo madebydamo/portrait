@@ -2,9 +2,8 @@
 
 Terminal.prototype.startIntroAnimation = function () {
   const introText = [
-    "Connecting...^1000",
-    "Welcome to my Portfolio Website^5",
-    "Welcome to my Portfolio Terminal^500",
+    "Loading Virus....^100",
+    "just kidding :)",
     "Type help to see available commands.",
   ];
 
