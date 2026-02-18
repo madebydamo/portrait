@@ -187,6 +187,8 @@ Terminal.prototype.loadCommand = async function (command) {
 };
 
 Terminal.prototype.executeClickableCommand = function (command) {
+  this.commandHistory.unshift(command);
+  this.historyIndex = -1;
   // Simulate typing the command like the initial help
   this.showCommand(command);
   this.inputLine.style.display = "none";
