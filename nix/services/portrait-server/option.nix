@@ -31,6 +31,14 @@
             // neo.mkReverseProxyOptions {
               subdomain = "portrait";
               auth.enabled = false;
+            }
+            // lib.neo.mkServiceMeta {
+              icon = "https://static.thenounproject.com/png/cv-icon-4553192-512.png";
+              description = ''
+                This is my portrait and also kinda my CV.
+              '';
+              projectUrl = "https://damianmoser.ch/";
+              githubUrl = "https://github.com/madebydamo/portrait";
             };
         };
         default = {};
