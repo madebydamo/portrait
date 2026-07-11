@@ -16,11 +16,4 @@ docker tag portrait-server $DOCKER_REPO:latest
 echo "Pushing Docker image to repository..."
 docker push $DOCKER_REPO:latest
 
-echo "Recreating services on the remote server..."
-ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
-cd /home/homeserver/docker
-docker pull $DOCKER_REPO:latest
-docker-compose up -d --remove-orphans
-EOF
-
-echo "Deployment completed successfully."
+echo "Manually update on your new homeserver or wait till midnight"
