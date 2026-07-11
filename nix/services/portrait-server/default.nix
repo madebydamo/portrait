@@ -20,7 +20,7 @@
               ROCKET_PORT = "7999";
               ROCKET_ADDRESS = "0.0.0.0";
             };
-          image = "madebydamo/portrait-server:latest";
+          image = cfg.containers.portrait-server;
           autoStart = true;
           extraOptions = [
             "--cap-add=SYS_ADMIN"

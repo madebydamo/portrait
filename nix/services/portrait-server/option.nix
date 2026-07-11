@@ -32,6 +32,9 @@
               subdomain = "portrait";
               auth.enabled = false;
             }
+            // lib.neo.mkContainerDefinitions {
+              portrait-server = "madebydamo/portrait-server:latest";
+            }
             // lib.neo.mkServiceMeta {
               icon = "https://static.thenounproject.com/png/cv-icon-4553192-512.png";
               description = ''
