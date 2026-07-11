@@ -3,6 +3,83 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Damian Moser — Developer, Engineer &amp; Open-Source Enthusiast
+    </title>
+    <meta
+      name="description"
+      content="Portfolio of Damian Moser: Master's student in Robotics at ETH Zurich and Development Engineer at Super Computing Systems. Explore projects, experience, skills, and a live POSIX terminal."
+    />
+    <meta
+      name="keywords"
+      content="Damian Moser, software engineer, ETH Zurich, robotics, open source, portfolio, Switzerland, St. Gallen, Super Computing Systems"
+    />
+    <meta name="author" content="Damian Moser" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://damianmoser.ch/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://damianmoser.ch/" />
+    <meta
+      property="og:title"
+      content="Damian Moser — Developer, Engineer &amp; Open-Source Enthusiast"
+    />
+    <meta
+      property="og:description"
+      content="Master's student in Robotics at ETH Zurich and Development Engineer. Interactive terminal portfolio with projects, experience, skills, and contact."
+    />
+    <meta property="og:image" content="https://damianmoser.ch/img/damo.jpg" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Damian Moser" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="Damian Moser — Developer, Engineer &amp; Open-Source Enthusiast"
+    />
+    <meta
+      name="twitter:description"
+      content="Master's student in Robotics at ETH Zurich and Development Engineer. Interactive terminal portfolio with projects, experience, skills, and contact."
+    />
+    <meta name="twitter:image" content="https://damianmoser.ch/img/damo.jpg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Damian Moser",
+        "url": "https://damianmoser.ch/",
+        "image": "https://damianmoser.ch/img/damo.jpg",
+        "email": "damian.d.moser@gmail.com",
+        "jobTitle": "Development Engineer",
+        "nationality": "Swiss",
+        "homeLocation": {
+          "@type": "Place",
+          "name": "St. Gallen, Switzerland"
+        },
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Super Computing Systems AG",
+          "url": "https://www.scs.ch/"
+        },
+        "alumniOf": {
+          "@type": "CollegeOrUniversity",
+          "name": "ETH Zurich"
+        },
+        "sameAs": ["https://github.com/madebydamo"],
+        "knowsAbout": [
+          "Software Engineering",
+          "Robotics",
+          "Open Source",
+          "Systems Programming",
+          "Web Development"
+        ],
+        "description": "Opinionated open-source enthusiast, tinkerer, and developer. Master's student in Robotics, Systems & Control at ETH Zurich and Development Engineer at Super Computing Systems."
+      }
+    </script>
+
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     <script src="js/terminal.js"></script>
     <script src="js/input-handling.js"></script>
@@ -13,12 +90,83 @@
     <script src="js/terminal-utils.js"></script>
     <script src="js/shardify.js"></script>
     <script src="js/inactivity-timer.js"></script>
-    <title>Damian Moser - Terminal</title>
     <link rel="stylesheet" href="reset.css" type="text/css" />
     <link rel="stylesheet" href="monospace.css" type="text/css" />
     <link rel="stylesheet" href="style.css" type="text/css" />
   </head>
   <body>
+    <!--
+      Crawlable content for search engines and agents that do not run JavaScript.
+      Hidden from the interactive terminal UI; links point at real HTML fragments.
+    -->
+    <section
+      id="seo-content"
+      class="seo-content"
+      aria-label="Portfolio overview"
+    >
+      <h1>Damian Moser</h1>
+      <p>
+        Opinionated open-source enthusiast, tinkerer, and developer based in
+        St.&nbsp;Gallen, Switzerland. Master's student in Robotics, Systems
+        &amp; Control at ETH Zurich and Development Engineer at Super Computing
+        Systems, working on public-transport ticketing systems, provisioning,
+        and hardware integration.
+      </p>
+      <p>
+        This site is an interactive POSIX-compatible terminal portfolio. You can
+        also open any section directly:
+      </p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li>
+            <a href="/commands/whoami.html">About me (whoami)</a> — background
+            and overview
+          </li>
+          <li>
+            <a href="/commands/experience.html">Experience</a> — professional
+            work at Super Computing Systems and beyond
+          </li>
+          <li>
+            <a href="/commands/education.html">Education</a> — ETH Zurich,
+            exchange, and path to university
+          </li>
+          <li>
+            <a href="/commands/skills.html">Skills</a> — programming languages
+            and tools
+          </li>
+          <li>
+            <a href="/commands/projects.html">Projects</a> — open-source and
+            personal work
+          </li>
+          <li>
+            <a href="/commands/homeserver.html">Homeserver (Neo)</a> —
+            self-hosted infrastructure
+          </li>
+          <li>
+            <a href="/commands/rubiks.html">Rubik's Cube Solver</a>
+          </li>
+          <li>
+            <a href="/commands/uttt.html">Ultimate Tic Tac Toe</a>
+          </li>
+          <li>
+            <a href="/commands/mandelbrot.html">Mandelbrot Explained</a>
+          </li>
+          <li>
+            <a href="/commands/contact.html">Contact</a> — email and links
+          </li>
+          <li><a href="/commands/message.html">Message</a> — send a message</li>
+          <li>
+            <a href="/commands/help.html">Help</a> — available terminal commands
+          </li>
+        </ul>
+      </nav>
+      <p>
+        GitHub:
+        <a href="https://github.com/madebydamo">github.com/madebydamo</a>
+        · Website: <a href="https://damianmoser.ch/">damianmoser.ch</a>
+      </p>
+    </section>
+
     <div class="noise"></div>
     <div class="overlay"></div>
 
@@ -38,7 +186,5 @@
       </div>
       <div id="completion-container"></div>
     </div>
-
-    <!-- Hidden image elements for the visual effects -->
   </body>
 </html>

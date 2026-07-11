@@ -1,0 +1,30 @@
+# Damian Moser
+
+> Portfolio of Damian Moser — open-source enthusiast, tinkerer, and developer.
+> Master's student in Robotics, Systems & Control at ETH Zurich.
+> Development Engineer at Super Computing Systems (Zurich).
+> Based in St. Gallen, Switzerland.
+
+This site is an interactive POSIX terminal. Content is also available as static HTML
+under /commands/ for crawlers and agents that do not execute JavaScript.
+
+## Pages
+
+- [About (whoami)](https://damianmoser.ch/commands/whoami.html): Overview, bio, location, current role
+- [Experience](https://damianmoser.ch/commands/experience.html): Professional work (SCS, apprenticeship)
+- [Education](https://damianmoser.ch/commands/education.html): ETH Zurich MSc Robotics, exchange, path to university
+- [Skills](https://damianmoser.ch/commands/skills.html): Programming languages and tools
+- [Projects](https://damianmoser.ch/commands/projects.html): Index of personal and open-source projects
+- [Homeserver (Neo)](https://damianmoser.ch/commands/homeserver.html): Self-hosted infrastructure and Neo framework
+- [Rubik's Cube Solver](https://damianmoser.ch/commands/rubiks.html): Browser cube solver (live at rubiks.damo4mf20.ch)
+- [Ultimate Tic Tac Toe](https://damianmoser.ch/commands/uttt.html): Genetic / PSO self-training bots
+- [Mandelbrot Explained](https://damianmoser.ch/commands/mandelbrot.html): Educational Mandelbrot visualization
+- [Contact](https://damianmoser.ch/commands/contact.html): Email and links
+- [Message](https://damianmoser.ch/commands/message.html): Send a message via the terminal
+- [Help](https://damianmoser.ch/commands/help.html): Available terminal commands
+
+## Links
+
+- Home: https://damianmoser.ch/
+- GitHub: https://github.com/madebydamo
+- Sitemap: https://damianmoser.ch/sitemap.xml

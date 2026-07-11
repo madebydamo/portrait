@@ -21,7 +21,7 @@ Terminal.prototype.startIntroAnimation = function () {
       const typedIntro = document.getElementById("typed-intro");
       typedIntro.innerHTML = typedIntro.innerHTML.replace(
         "Type help to see available commands.",
-        'Type <span class="clickable-command" data-command="help">help</span> to see available commands.',
+        'Type <a class="clickable-command" href="/commands/help.html" data-command="help">help</a> to see available commands.',
       );
 
       setTimeout(() => {

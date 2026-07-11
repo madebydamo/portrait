@@ -39,7 +39,7 @@ Terminal.prototype.showInactivityMessage = function () {
   const messageDiv = document.createElement("div");
   messageDiv.id = "inactivity-message";
   messageDiv.innerHTML =
-    'Type <span class="clickable-command" data-command="help">help</span> to see the available commands';
+    'Type <a class="clickable-command" href="/commands/help.html" data-command="help">help</a> to see the available commands';
   this.completionContainer.appendChild(messageDiv);
 };
 
