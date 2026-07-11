@@ -1,68 +1,136 @@
-<h2>Homeserver</h2>
+<h2>Homeserver · Neo</h2>
+
 <p>
-  Well, what else should I tell you besides the fact that you already are
-  communicating with a
+  Fun fact: you are already talking to it. This portfolio is served from a
   <a
     href="https://www.zimaspace.com/products/single-board-server"
     target="_blank"
     >ZimaBoard</a
   >
-  in my living room? Well, it's not just this site. I have a couple other
-  domains, where I host awesome services for others and myself. What a fun hobby
-  to have, wouldn't you agree? :-)
+  in my living room—not from some corporate cloud. Same box runs my photos,
+  files, media, DNS blocking, and a pile of open-source tools I actually use
+  every day.
 </p>
 
-<h3>Favorite Services</h3>
-<p>Here are my top picks i can't live without or want to give credits to.</p>
+<p>
+  The stack is
+  <strong
+    ><a href="https://github.com/madebydamo/neo" target="_blank">Neo</a></strong
+  >: a declarative
+  <a href="https://nixos.org" target="_blank">NixOS</a> homeserver I built so
+  self-hosting is reproducible, revertable, and recoverable—without babysitting
+  Docker Compose forever. Opinionated defaults, automatic HTTPS, double auth,
+  auto-updates, plugins for everything that is too opinionated... Data stays on
+  <em>my</em> machine. Port 443 in; everything else locked down.
+</p>
+
+<h3>Live on this machine (plugins)</h3>
+<p>
+  Neo is modular: extra apps ship as plugins on the same secure front door. Two
+  of mine are public right now—including the site you are on:
+</p>
 <ul>
   <li>
-    <a href="https://github.com/home-assistant" target="_blank"
-      >Home Assistant</a
+    <a href="https://portrait.damo4mf20.ch" target="_blank"
+      >portrait.damo4mf20.ch</a
     >
-    - No need for light switches anymore, all automated
+    — this portfolio (plugin:
+    <a href="https://github.com/madebydamo/portrait" target="_blank">portrait</a
+    >)
   </li>
   <li>
-    <a href="https://github.com/syncthing/syncthing" target="_blank"
-      >Syncthing</a
+    <a href="https://rubiks.damo4mf20.ch" target="_blank"
+      >rubiks.damo4mf20.ch</a
     >
-    - Continuous file synchronization
+    — Rubik’s cube solver UI (plugin / project:
+    <a href="https://github.com/madebydamo/rubiks" target="_blank">rubiks</a>) ·
+    also
+    <span class="clickable-command" data-command="projects rubiks"
+      >projects rubiks</span
+    >
   </li>
   <li>
-    <a href="https://github.com/pi-hole/pi-hole" target="_blank">Pi-hole</a> -
-    Network-wide ad/tracking/scam blocking
+    <a href="https://github.com/madebydamo/neo" target="_blank">Neo</a> — the
+    homeserver framework itself (open source, PRs welcome)
+  </li>
+  <li>
+    <a href="https://github.com/madebydamo/highsea.neo" target="_blank"
+      >highsea.neo</a
+    >
+    — media / *arr stack as a Neo plugin (Jellyfin, Sonarr, …)
+  </li>
+</ul>
+
+<h3>What runs here (greatest hits)</h3>
+<p>
+  Not a complete inventory—just the services I would miss if they disappeared
+  tomorrow:
+</p>
+<ul>
+  <li>
+    <a href="https://github.com/immich-app/immich" target="_blank">Immich</a> —
+    photo &amp; video library that does not phone home to big tech
   </li>
   <li>
     <a href="https://github.com/jellyfin/jellyfin" target="_blank">Jellyfin</a>
-    - Media server
+    — media server, my way
   </li>
   <li>
     <a href="https://github.com/nextcloud/server" target="_blank">Nextcloud</a>
-    - Self-hosted cloud tools like docs, PowerPoint, file storage, etc.
-  </li>
-  <li>
-    <a href="https://github.com/immich-app/immich" target="_blank">Immich</a> -
-    Best photo and video backup
-  </li>
-  <li>
-    <a href="https://github.com/searxng/searxng" target="_blank">SearXNG</a> -
-    Privacy-respecting metasearch engine,
-    <a href="https://search.damo4mf20.ch" target="_blank">try it</a>
+    — files, docs, “cloud” without the cloud landlord
   </li>
   <li>
     <a href="https://github.com/paperless-ngx/paperless-ngx" target="_blank"
       >Paperless-ngx</a
     >
-    - Document management system, makes me almost paperless :-)
+    — documents scanned, searchable, almost paperless
   </li>
   <li>
-    <a href="https://fortilegends.ch" target="_blank">FortiLegends</a> - Blog
-    for FortiLegends Social Club
+    <a href="https://github.com/dani-garcia/vaultwarden" target="_blank"
+      >Vaultwarden</a
+    >
+    — password vault on disk I control
+  </li>
+  <li>
+    <a href="https://github.com/pi-hole/pi-hole" target="_blank">Pi-hole</a> —
+    network-wide ads / trackers / junk DNS
+  </li>
+  <li>
+    <a href="https://github.com/syncthing/syncthing" target="_blank"
+      >Syncthing</a
+    >
+    — continuous file sync, no central nanny
+  </li>
+  <li>
+    <a href="https://github.com/searxng/searxng" target="_blank">SearXNG</a> —
+    metasearch without the profiling ·
+    <a href="https://search.damo4mf20.ch" target="_blank">try it</a>
+  </li>
+  <li>
+    <a href="https://www.home-assistant.io/" target="_blank">Home Assistant</a>
+    — lights and home automation (i love motion sensors)
+  </li>
+  <li>
+    <a href="https://fortilegends.ch" target="_blank">FortiLegends</a> — blog
+    for FortiLegends Social Club, also living here
   </li>
 </ul>
 
+<h3>Why bother?</h3>
 <p>
-  This homeserver setup is one of my featured
-  <span class="clickable-command" data-command="projects">projects</span>. To
-  see the technologies and skills involved, check
-  <span class="clickable-command" data-command="skills">skills</span>.
+  Because renting forever is boring. Open source on hardware you own means you
+  can inspect it, keep it, and move it. Neo is my attempt to make that
+  accessible: same reproducibility story as Nix, packaged so you are not a
+  full-time reverse-proxy engineer.
+  <a href="https://github.com/madebydamo/neo" target="_blank"
+    >Star it, fork it, break it, improve it.</a
+  >
+</p>
+
+<p>
+  More projects:
+  <span class="clickable-command" data-command="projects">projects</span>. Stack
+  and skills:
+  <span class="clickable-command" data-command="skills">skills</span>. Back to
+  <span class="clickable-command" data-command="whoami">whoami</span>.
 </p>
