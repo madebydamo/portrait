@@ -23,9 +23,11 @@
             };
           image = cfg.containers.portrait-server;
           autoStart = true;
+          capabilities = {
+            SYS_ADMIN = true;
+            NET_ADMIN = true;
+          };
           extraOptions = [
-            "--cap-add=SYS_ADMIN"
-            "--cap-add=NET_ADMIN"
             "--security-opt=seccomp=unconfined"
           ];
         };

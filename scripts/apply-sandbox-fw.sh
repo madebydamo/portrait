@@ -1,14 +1,15 @@
 #!/bin/sh
 # Restrict uid 999 egress when this container shares a VPN netns.
-# Disabled unless PORTRAIT_SANDBOX_FW=1 so local compose is unchanged.
+# Guest localhost is DNS-only (127.0.0.1:53) so shared-netns services
+# such as karakeep :3000 stay unreachable. Everything else is tun0.
+# PORTRAIT_SANDBOX_FW=1 is fail-closed (homeserver). Unset + no NET_ADMIN
+# skips so local compose still starts.
 set -eu
 UID_S=999
 COMMENT_PREFIX=portrait-sandbox
-
-if [ "${PORTRAIT_SANDBOX_FW:-}" != "1" ]; then
-  echo "portrait-sandbox-fw: skipped (PORTRAIT_SANDBOX_FW!=1)"
-  exit 0
-fi
+STAMP=/run/portrait-sandbox-fw.installed
+required=0
+[ "${PORTRAIT_SANDBOX_FW:-}" = "1" ] && required=1
 
 backends() {
   kind=$1
@@ -22,6 +23,10 @@ backends() {
   elif command -v "$any" >/dev/null 2>&1; then
     printf '%s\n' "$any"
   fi
+}
+
+usable() {
+  "$1" -S OUTPUT >/dev/null 2>&1
 }
 
 clear_rules() {
@@ -39,6 +44,7 @@ install_v4() {
   ipt=$1
   clear_rules "$ipt"
   # Insert at 1 so these beat Gluetun's later -o lo -j ACCEPT.
+  # lo: only 127.0.0.1:53 (VPN DNS). No other localhost / shared-netns ports.
   "$ipt" -I OUTPUT 1 -m owner --uid-owner "$UID_S" -j DROP \
     -m comment --comment "${COMMENT_PREFIX}-drop" || return 1
   "$ipt" -I OUTPUT 1 -m owner --uid-owner "$UID_S" -o tun0 -j ACCEPT \
@@ -66,25 +72,44 @@ install_v6() {
   }
 }
 
-install_rules() {
-  v4=$(backends 4)
-  [ -n "$v4" ] || {
-    echo "portrait-sandbox-fw: iptables missing" >&2
-    return 1
-  }
-  v6=$(backends 6)
-  [ -n "$v6" ] || {
-    echo "portrait-sandbox-fw: ip6tables missing" >&2
-    return 1
-  }
-
-  for ipt in $v4; do
-    install_v4 "$ipt" || return 1
+install_family() {
+  kind=$1
+  bins=$(backends "$kind")
+  [ -n "$bins" ] || return 1
+  ok=
+  for ipt in $bins; do
+    usable "$ipt" || continue
+    if [ "$kind" = 4 ]; then
+      install_v4 "$ipt" || return 1
+    else
+      install_v6 "$ipt" || return 1
+    fi
+    ok=1
   done
-  for ipt in $v6; do
-    install_v6 "$ipt" || return 1
-  done
+  [ -n "$ok" ]
 }
 
-install_rules
+install_rules() {
+  install_family 4 || {
+    echo "portrait-sandbox-fw: no usable iptables" >&2
+    return 1
+  }
+  install_family 6 || {
+    echo "portrait-sandbox-fw: no usable ip6tables" >&2
+    return 1
+  }
+}
+
+if ! install_rules; then
+  if [ "$required" = 1 ]; then
+    echo "portrait-sandbox-fw: required install failed" >&2
+    exit 1
+  fi
+  echo "portrait-sandbox-fw: skipped (iptables not usable)"
+  exit 0
+fi
+
+if [ -w /run ]; then
+  : >"$STAMP"
+fi
 echo "portrait-sandbox-fw: uid=${UID_S} VPN-only egress installed (tun0=$(grep -c '^ *tun0:' /proc/net/dev || true))"
