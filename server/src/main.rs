@@ -99,20 +99,32 @@ async fn execute_command(
     let mut cmd = tokio::process::Command::new("prlimit");
     cmd.arg("--cpu=5");
     cmd.arg("--as=100000000");
+    // Real uid 999 so iptables owner-match applies. Root + bwrap --uid remaps skuid to 0;
+    // --unshare-user after setpriv does not.
+    cmd.arg("setpriv");
+    cmd.arg("--reuid=999");
+    cmd.arg("--regid=999");
+    cmd.arg("--clear-groups");
+    cmd.arg("--nnp");
+    cmd.arg("--inh-caps=-all");
+    cmd.arg("--bounding-set=-all");
+    cmd.arg("--");
     cmd.arg("bwrap");
     cmd.arg("--unshare-user");
     cmd.arg("--ro-bind").arg("/").arg("/");
     cmd.arg("--dev-bind").arg("/dev").arg("/dev");
     cmd.arg("--unshare-pid");
     cmd.arg("--bind").arg("/proc").arg("/proc");
+    // Public DNS only — no Docker/gluetun names for container hosts.
+    cmd.arg("--ro-bind")
+        .arg("/etc/portrait/resolv.sandbox.conf")
+        .arg("/etc/resolv.conf");
     cmd.arg("--new-session");
     cmd.arg("--die-with-parent");
     cmd.arg("--clearenv");
     cmd.arg("--setenv")
         .arg("PATH")
         .arg("/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
-    cmd.arg("--uid").arg("999");
-    cmd.arg("--gid").arg("999");
     cmd.arg("--chdir").arg("/home/damo");
     cmd.arg("--setenv").arg("HOME").arg("/home/damo");
     cmd.arg("--setenv").arg("USER").arg("damo");

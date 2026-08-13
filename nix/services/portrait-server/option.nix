@@ -25,7 +25,7 @@
             // neo.mkVpnOptions {
               containers = ["portrait-server"];
               networks = ["internal"];
-              ports = [7779];
+              ports = [7999];
               enabled = true;
             }
             // neo.mkReverseProxyOptions {

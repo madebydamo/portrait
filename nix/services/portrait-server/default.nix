@@ -19,11 +19,13 @@
             // {
               ROCKET_PORT = "7999";
               ROCKET_ADDRESS = "0.0.0.0";
+              PORTRAIT_SANDBOX_FW = "1";
             };
           image = cfg.containers.portrait-server;
           autoStart = true;
           extraOptions = [
             "--cap-add=SYS_ADMIN"
+            "--cap-add=NET_ADMIN"
             "--security-opt=seccomp=unconfined"
           ];
         };

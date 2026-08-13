@@ -1,27 +1,16 @@
-# Use the official Rust image as the base image
-FROM rust:1.90 as builder
-
-# Set the working directory
+FROM rust:1.90 AS builder
 WORKDIR /home/damo
-
-# Copy the Cargo.toml and Cargo.lock files
 COPY server/Cargo.toml server/Cargo.lock ./
-
-# Copy the source code
 COPY server/src ./src
-
-# Build the application
 RUN cargo build --release
 
-# Use a minimal base image for the final stage
-FROM ubuntu:24.04 as sandbox
-
-# Install necessary dependencies, sandbox tools, and fun packages
+FROM ubuntu:24.04 AS sandbox
 RUN apt-get update && apt-get install -y \
   ca-certificates \
   bubblewrap \
   util-linux \
   coreutils \
+  iptables \
   cowsay \
   curl \
   fortune-mod \
@@ -32,21 +21,17 @@ RUN apt-get update && apt-get install -y \
   sl && \
   rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user with fixed UID/GID
 RUN useradd -r -u 999 -s /bin/false damo
 RUN mkdir -p /home/damo
-
-# Set the working directory
 WORKDIR /home/damo
 
-# Copy the built binary from the builder stage
 COPY --from=builder /home/damo/target/release/server /home/damo/server
-
-# Copy the www directory
 COPY www ./www
+COPY scripts/apply-sandbox-fw.sh /usr/local/bin/apply-sandbox-fw.sh
+COPY scripts/entrypoint.sh /usr/local/bin/portrait-entrypoint.sh
+COPY scripts/resolv.sandbox.conf /etc/portrait/resolv.sandbox.conf
+RUN chmod 755 /usr/local/bin/apply-sandbox-fw.sh /usr/local/bin/portrait-entrypoint.sh && \
+  chown -R damo:damo /home/damo && \
+  chmod -R go-w /home/damo
 
-# Change ownership to root to prevent modifications/deletions by damo
-RUN chown -R damo:damo /home/damo && \
-  chmod -R go-w /home/damo  # Remove write perms for group/other (redundant but explicit)
-
-CMD ["./server"]
+CMD ["/usr/local/bin/portrait-entrypoint.sh"]
