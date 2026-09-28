@@ -205,19 +205,31 @@ details {
 }
 
 summary {
+  display: block;
+  position: relative;
+  padding-left: 2ch;
   font-weight: var(--font-weight-medium);
   cursor: pointer;
+  list-style: none;
 }
-details[open] summary {
+summary::-webkit-details-marker {
+  display: none;
+}
+summary::marker {
+  content: none;
+}
+summary::before {
+  content: "▶";
+  position: absolute;
+  left: 0;
+  top: 0;
+  line-height: var(--line-height);
+  font-weight: var(--font-weight-normal);
+}
+details[open] > summary {
   margin-bottom: var(--line-height);
 }
-
-details ::marker {
-  display: inline-block;
-  content: "▶";
-  margin: 0;
-}
-details[open] ::marker {
+details[open] > summary::before {
   content: "▼";
 }
 
