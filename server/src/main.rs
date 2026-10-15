@@ -2,6 +2,7 @@ use reqwest::Client;
 use rocket::fs::FileServer;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{get, launch, post, routes};
+use std::net::IpAddr;
 use std::process::Stdio;
 use std::time::Duration;
 use tokio::io::AsyncReadExt;
@@ -25,8 +26,13 @@ struct CommandResponse {
 
 #[post("/execute", data = "<req>")]
 async fn execute_command(
+    ip: Option<IpAddr>,
     req: rocket::serde::json::Json<CommandRequest>,
 ) -> rocket::serde::json::Json<CommandResponse> {
+    // ip comes from X-Real-IP (set by SWAG), else the peer address.
+    // {:?} escapes newlines so a command cannot forge extra log lines.
+    let ip = ip.map_or_else(|| "-".to_string(), |ip| ip.to_string());
+    println!("portrait-exec: ip={} cmd={:?}", ip, req.command);
     if req.command.starts_with("message ") {
         let message = req.command.strip_prefix("message ").unwrap_or("").trim();
         if message.is_empty() {
