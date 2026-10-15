@@ -1,11 +1,14 @@
 # Portrait-server service options.
-{...}: {
+{withSystem, ...}: {
   flake.modules.nixos.portrait-server-option = {
     config,
     lib,
+    pkgs,
     ...
   }:
-    with lib; {
+    with lib; let
+      image = withSystem pkgs.stdenv.hostPlatform.system ({config, ...}: config.packages.portrait-server-image);
+    in {
       options.neo.services.portrait-server = mkOption {
         type = types.submodule {
           options =
@@ -33,7 +36,9 @@
               auth.enabled = false;
             }
             // lib.neo.mkContainerDefinitions {
-              portrait-server = "madebydamo/portrait-server:latest";
+              # Built by this flake and loaded by portrait-server-image.service.
+              portrait-server = image.imageRefUnsafe;
+              extraUnits = ["portrait-server-image"];
             }
             // lib.neo.mkServiceMeta {
               icon = "https://static.thenounproject.com/png/cv-icon-4553192-512.png";

@@ -5,5 +5,6 @@ in {
     flake-file.url = lib.mkDefault "github:vic/flake-file";
     neo.url = "github:madebydamo/neo";
     neo.inputs.nixpkgs.follows = "nixpkgs";
+    nix2container.url = "github:nlewo/nix2container";
   };
 }

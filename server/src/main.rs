@@ -1,5 +1,5 @@
 use reqwest::Client;
-use rocket::fs::{relative, FileServer};
+use rocket::fs::FileServer;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{get, launch, post, routes};
 use std::process::Stdio;
@@ -212,6 +212,6 @@ fn get_commands() -> rocket::serde::json::Json<Vec<String>> {
 fn rocket() -> _ {
     rocket::build()
         .configure(rocket::config::Config::figment())
-        .mount("/", FileServer::from(relative!("./www")).rank(1))
+        .mount("/", FileServer::from("./www").rank(1))
         .mount("/", routes![execute_command, get_commands])
 }
