@@ -9,6 +9,7 @@ UID_S=999
 COMMENT_PREFIX=portrait-sandbox
 STAMP=/run/portrait-sandbox-fw.installed
 required=0
+changed=
 [ "${PORTRAIT_SANDBOX_FW:-}" = "1" ] && required=1
 
 backends() {
@@ -79,11 +80,13 @@ install_family() {
   ok=
   for ipt in $bins; do
     usable "$ipt" || continue
+    before=$("$ipt" -S OUTPUT 2>/dev/null || true)
     if [ "$kind" = 4 ]; then
       install_v4 "$ipt" || return 1
     else
       install_v6 "$ipt" || return 1
     fi
+    [ "$before" = "$("$ipt" -S OUTPUT 2>/dev/null || true)" ] || changed=1
     ok=1
   done
   [ -n "$ok" ]
@@ -112,4 +115,6 @@ fi
 if [ -w /run ]; then
   : >"$STAMP"
 fi
+# The entrypoint re-runs this every 15s; only log when the rules moved.
+[ -n "$changed" ] || exit 0
 echo "portrait-sandbox-fw: uid=${UID_S} VPN-only egress installed (tun0=$(grep -c '^ *tun0:' /proc/net/dev || true))"

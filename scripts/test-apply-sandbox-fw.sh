@@ -84,6 +84,10 @@ out=$(run_fw "$state" "$SCRIPT" 2>&1) || fail "install exited $? without PORTRAI
 printf '%s\n' "$out" | grep -q 'VPN-only egress installed' \
   || fail "expected install without PORTRAIT_SANDBOX_FW, got: $out"
 
+# --- re-run with rules already in place: silent (entrypoint re-applies every 15s) ---
+out=$(run_fw "$state" "$SCRIPT" 2>&1) || fail "re-apply exited $?: $out"
+[ -z "$out" ] || fail "re-apply with unchanged rules should be silent, got: $out"
+
 v4="$state/iptables-nft/rules"
 [ -s "$v4" ] || fail "no iptables-nft rules written"
 
@@ -110,6 +114,13 @@ grep -q 'portrait-sandbox-drop6' "$v6" || fail "missing IPv6 DROP: $(cat "$v6")"
 if grep -q -- '-j ACCEPT' "$v6"; then
   fail "IPv6 must not ACCEPT localhost (::1) or anything else: $(cat "$v6")"
 fi
+
+# --- rules wiped (Gluetun restored its snapshot): reinstall and log ---
+: >"$v4"
+out=$(run_fw "$state" "$SCRIPT" 2>&1) || fail "reinstall exited $?: $out"
+printf '%s\n' "$out" | grep -q 'VPN-only egress installed' \
+  || fail "expected log after rules were wiped, got: $out"
+grep -q 'portrait-sandbox-drop' "$v4" || fail "reinstall missing DROP: $(cat "$v4")"
 
 # --- no NET_ADMIN: skip (local compose) unless required ---
 deny=$(mktemp -d)
