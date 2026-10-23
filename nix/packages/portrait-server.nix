@@ -22,7 +22,7 @@
         bashInteractive
         bash-completion
         coreutils
-        util-linux # prlimit, setpriv, script
+        util-linux # prlimit, setpriv
         bubblewrap
         iptables
         gnugrep

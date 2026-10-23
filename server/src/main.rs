@@ -104,9 +104,10 @@ async fn execute_command(
 
     let mut cmd = tokio::process::Command::new("prlimit");
     cmd.arg("--cpu=5");
-    cmd.arg("--as=100000000");
-    // Real uid 999 so iptables owner-match applies. Root + bwrap --uid remaps skuid to 0;
-    // --unshare-user after setpriv does not.
+    // 50 MiB virtual address space per guest command.
+    cmd.arg("--as=52428800");
+    // Real uid 999 so iptables owner-match applies. Root + bwrap --uid remaps skuid to 0.
+    // --unshare-user here maps 999 -> 999; it does not remap skuid to 0.
     cmd.arg("setpriv");
     cmd.arg("--reuid=999");
     cmd.arg("--regid=999");
@@ -122,6 +123,7 @@ async fn execute_command(
     cmd.arg("--unshare-pid");
     cmd.arg("--bind").arg("/proc").arg("/proc");
     // Public DNS only — no Docker/gluetun names for container hosts.
+    // Installed at image build from scripts/resolv.sandbox.conf.
     cmd.arg("--ro-bind")
         .arg("/etc/portrait/resolv.sandbox.conf")
         .arg("/etc/resolv.conf");
@@ -138,11 +140,14 @@ async fn execute_command(
         cmd.arg("--setenv").arg("COLUMNS").arg(width.to_string());
     }
     cmd.arg("--");
-    cmd.arg("script");
-    cmd.arg("-q");
+    // script(1) puts the guest on a pty. As uid 999 that output never reaches
+    // the pipes this process captures (empty exit 0). Stay on the pipes.
+    cmd.arg("stdbuf");
+    cmd.arg("-o0");
+    cmd.arg("-e0");
+    cmd.arg("bash");
     cmd.arg("-c");
-    cmd.arg(format!("stdbuf -o0 bash -c \"{}\"", &req.command));
-    cmd.arg("/dev/null");
+    cmd.arg(&req.command);
     cmd.stdout(Stdio::piped());
     cmd.stderr(Stdio::piped());
 
