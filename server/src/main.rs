@@ -104,8 +104,9 @@ async fn execute_command(
 
     let mut cmd = tokio::process::Command::new("prlimit");
     cmd.arg("--cpu=5");
-    // 50 MiB virtual address space per guest command.
-    cmd.arg("--as=52428800");
+    // 128 MiB virtual address space. Ruby lolcat fails under 50 MiB, and
+    // the failure point moves around 72-80 MiB depending on mapping layout.
+    cmd.arg("--as=134217728");
     // Real uid 999 so iptables owner-match applies. Root + bwrap --uid remaps skuid to 0.
     // --unshare-user here maps 999 -> 999; it does not remap skuid to 0.
     cmd.arg("setpriv");
@@ -179,7 +180,7 @@ async fn execute_command(
 
     let wait_result = timeout(Duration::from_secs(10), child.wait()).await;
 
-    let (stdout, stderr, status) = match wait_result {
+    let (stdout, mut stderr, status) = match wait_result {
         Ok(Ok(exit_status)) => (
             stdout_task.await.unwrap_or_default(),
             stderr_task.await.unwrap_or_default(),
@@ -193,6 +194,12 @@ async fn execute_command(
             ("".to_string(), "Command timed out".to_string(), -1)
         }
     };
+
+    // Curl's progress meter and similar noise go to stderr even on success.
+    // The page renders stderr in red, so drop it when the command worked.
+    if status == 0 {
+        stderr.clear();
+    }
 
     rocket::serde::json::Json(CommandResponse {
         stdout,

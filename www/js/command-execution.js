@@ -156,7 +156,8 @@ Terminal.prototype.loadCommand = async function (command) {
           commandOutput.innerHTML = `<pre class="output">${ansiToHtml(data.stdout)}</pre>`;
         }
 
-        if (data.stderr) {
+        // Red block. Hide it when the command succeeded (curl progress, etc.).
+        if (data.stderr && data.status !== 0) {
           const stderrDiv = document.createElement("div");
           stderrDiv.innerHTML = `<pre class="output error">${ansiToHtml(data.stderr)}</pre>`;
           commandOutput.appendChild(stderrDiv);
