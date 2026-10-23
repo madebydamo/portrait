@@ -1341,6 +1341,7 @@ dependencies = [
 name = "server"
 version = "0.1.0"
 dependencies = [
+ "libc",
  "reqwest",
  "rocket",
  "serde",

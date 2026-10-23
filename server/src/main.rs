@@ -2,7 +2,10 @@ use reqwest::Client;
 use rocket::fs::FileServer;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{get, launch, post, routes};
+use std::fs::File;
+use std::io::{self, Read};
 use std::net::IpAddr;
+use std::os::unix::io::FromRawFd;
 use std::process::Stdio;
 use std::time::Duration;
 use tokio::io::AsyncReadExt;
@@ -22,6 +25,73 @@ struct CommandResponse {
     stdout: String,
     stderr: String,
     status: i32,
+}
+
+// Master, plus the slave as the guest's stdout. None means use a pipe.
+fn open_guest_stdout(columns: Option<i32>) -> Option<(File, File)> {
+    let columns = match columns {
+        Some(width) if width > 0 => u16::try_from(width).unwrap_or(u16::MAX),
+        _ => 80,
+    };
+    unsafe {
+        let master_fd = libc::posix_openpt(libc::O_RDWR | libc::O_NOCTTY | libc::O_CLOEXEC);
+        if master_fd < 0 {
+            return None;
+        }
+        if libc::grantpt(master_fd) != 0 || libc::unlockpt(master_fd) != 0 {
+            libc::close(master_fd);
+            return None;
+        }
+        let mut name = [0i8; 128];
+        if libc::ptsname_r(master_fd, name.as_mut_ptr(), name.len()) != 0 {
+            libc::close(master_fd);
+            return None;
+        }
+        let slave_fd = libc::open(name.as_ptr(), libc::O_RDWR | libc::O_NOCTTY | libc::O_CLOEXEC);
+        if slave_fd < 0 {
+            libc::close(master_fd);
+            return None;
+        }
+        let mut termios = std::mem::zeroed();
+        if libc::tcgetattr(slave_fd, &mut termios) != 0 {
+            libc::close(master_fd);
+            libc::close(slave_fd);
+            return None;
+        }
+        libc::cfmakeraw(&mut termios);
+        if libc::tcsetattr(slave_fd, libc::TCSANOW, &termios) != 0 {
+            libc::close(master_fd);
+            libc::close(slave_fd);
+            return None;
+        }
+        let mut size = libc::winsize {
+            ws_row: 24,
+            ws_col: columns,
+            ws_xpixel: 0,
+            ws_ypixel: 0,
+        };
+        libc::ioctl(slave_fd, libc::TIOCSWINSZ, &mut size);
+        Some((
+            File::from_raw_fd(master_fd),
+            File::from_raw_fd(slave_fd),
+        ))
+    }
+}
+
+// A pty master returns EIO once the slave side closes, after the buffered bytes.
+fn read_pty_master(mut master: File) -> Vec<u8> {
+    let mut buf = Vec::new();
+    let mut tmp = [0u8; 8192];
+    loop {
+        match master.read(&mut tmp) {
+            Ok(0) => break,
+            Ok(n) => buf.extend_from_slice(&tmp[..n]),
+            Err(err) if err.raw_os_error() == Some(libc::EIO) => break,
+            Err(err) if err.kind() == io::ErrorKind::Interrupted => continue,
+            Err(_) => break,
+        }
+    }
+    buf
 }
 
 #[post("/execute", data = "<req>")]
@@ -141,15 +211,27 @@ async fn execute_command(
         cmd.arg("--setenv").arg("COLUMNS").arg(width.to_string());
     }
     cmd.arg("--");
-    // script(1) puts the guest on a pty. As uid 999 that output never reaches
-    // the pipes this process captures (empty exit 0). Stay on the pipes.
+    // script(1) opens its own pty inside the guest. As uid 999 that output
+    // never reached us. stdbuf leaves the guest on the fds attached below.
     cmd.arg("stdbuf");
     cmd.arg("-o0");
     cmd.arg("-e0");
     cmd.arg("bash");
     cmd.arg("-c");
     cmd.arg(&req.command);
-    cmd.stdout(Stdio::piped());
+    // A pipe makes lolcat copy stdin unchanged. A pty makes stdout a tty so it
+    // colorizes. stderr stays a pipe so success can still drop curl's meter.
+    let pty_master = match open_guest_stdout(req.width) {
+        Some((master, slave)) => {
+            cmd.stdout(Stdio::from(slave));
+            Some(master)
+        }
+        None => {
+            eprintln!("portrait-exec: pty unavailable, stdout is a pipe");
+            cmd.stdout(Stdio::piped());
+            None
+        }
+    };
     cmd.stderr(Stdio::piped());
 
     let mut child = match cmd.spawn() {
@@ -163,14 +245,18 @@ async fn execute_command(
         }
     };
 
-    let mut stdout_reader = child.stdout.take().expect("stdout piped");
     let mut stderr_reader = child.stderr.take().expect("stderr piped");
 
-    let stdout_task = task::spawn(async move {
-        let mut buf = Vec::new();
-        let _ = stdout_reader.read_to_end(&mut buf).await;
-        String::from_utf8_lossy(&buf).to_string()
-    });
+    let stdout_task = if let Some(master) = pty_master {
+        task::spawn_blocking(move || String::from_utf8_lossy(&read_pty_master(master)).into_owned())
+    } else {
+        let mut stdout_reader = child.stdout.take().expect("stdout piped");
+        task::spawn(async move {
+            let mut buf = Vec::new();
+            let _ = stdout_reader.read_to_end(&mut buf).await;
+            String::from_utf8_lossy(&buf).to_string()
+        })
+    };
 
     let stderr_task = task::spawn(async move {
         let mut buf = Vec::new();
@@ -224,6 +310,89 @@ fn get_commands() -> rocket::serde::json::Json<Vec<String>> {
         }
     }
     rocket::serde::json::Json(commands)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{open_guest_stdout, read_pty_master};
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+    use std::thread;
+
+    #[test]
+    fn guest_stdout_pty_is_a_raw_tty() {
+        let Some((master, slave)) = open_guest_stdout(Some(40)) else {
+            return;
+        };
+        let mut child = Command::new("sh")
+            .args([
+                "-c",
+                "if [ -t 1 ]; then printf 'tty=True\\n'; else printf 'tty=False\\n'; fi",
+            ])
+            .stdin(Stdio::null())
+            .stdout(Stdio::from(slave))
+            .stderr(Stdio::null())
+            .spawn()
+            .expect("spawn sh");
+        let reader = thread::spawn(move || read_pty_master(master));
+        let status = child.wait().expect("wait");
+        let buf = reader.join().expect("reader");
+        assert!(status.success());
+        assert_eq!(String::from_utf8_lossy(&buf), "tty=True\n");
+    }
+
+    #[test]
+    fn lolcat_colors_a_pty_and_not_a_pipe() {
+        let Ok(lolcat) = std::env::var("LOLCAT") else {
+            return;
+        };
+        let Some((master, slave)) = open_guest_stdout(Some(80)) else {
+            return;
+        };
+        let mut child = Command::new(&lolcat)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::from(slave))
+            .stderr(Stdio::null())
+            .env_clear()
+            .env("PATH", "/usr/bin:/bin")
+            .env("HOME", "/tmp")
+            .spawn()
+            .expect("spawn lolcat");
+        child
+            .stdin
+            .take()
+            .expect("stdin")
+            .write_all(b"Hello\n")
+            .expect("write");
+        let reader = thread::spawn(move || read_pty_master(master));
+        let status = child.wait().expect("wait");
+        let colored = reader.join().expect("reader");
+        assert!(status.success(), "lolcat on a pty failed");
+        assert!(
+            colored.windows(4).any(|w| w == b"38;5"),
+            "pty lolcat produced no 256-color codes: {colored:?}"
+        );
+        assert!(!colored.contains(&b'\r'));
+
+        let mut plain = Command::new(&lolcat)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .env_clear()
+            .env("PATH", "/usr/bin:/bin")
+            .env("HOME", "/tmp")
+            .spawn()
+            .expect("spawn plain lolcat");
+        plain
+            .stdin
+            .take()
+            .expect("stdin")
+            .write_all(b"Hello\n")
+            .expect("write");
+        let plain_out = plain.wait_with_output().expect("wait plain");
+        assert!(plain_out.status.success());
+        assert_eq!(plain_out.stdout, b"Hello\n");
+    }
 }
 
 #[launch]
