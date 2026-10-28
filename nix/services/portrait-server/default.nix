@@ -3,19 +3,29 @@
   flake.modules.nixos.portrait-server = {
     config,
     lib,
+    options,
     pkgs,
     ...
   }:
     with lib; let
       cfg = config.neo.services.portrait-server;
-      portraitEnv = lib.filterAttrs (_: v: v != null && v != "") {
+      # Secret half: never in the container's store-visible `environment`.
+      # Neo with secrets renders it at activation into an env file the
+      # container loads (environmentFiles, restarts docker-portrait-server
+      # on change); older Neo keeps the previous inline environment.
+      secretEnv = lib.filterAttrs (_: v: v != null && v != "") {
         TELEGRAM_BOT_TOKEN = cfg.telegramBotToken;
-        TELEGRAM_CHAT_ID = cfg.telegramChatId;
       };
+      hasNeoSecrets = options.neo ? core && options.neo.core ? secrets;
+      portraitEnv =
+        lib.filterAttrs (_: v: v != null && v != "") {
+          TELEGRAM_CHAT_ID = cfg.telegramChatId;
+        }
+        // lib.optionalAttrs (!hasNeoSecrets) secretEnv;
       image = withSystem pkgs.stdenv.hostPlatform.system ({config, ...}: config.packages.portrait-server-image);
       docker = "${config.virtualisation.docker.package}/bin/docker";
     in {
-      config = mkIf cfg.enabled {
+      config = mkIf cfg.enabled ({
         # Loads the Nix-built image into Docker ahead of the container unit.
         # The tag is the image hash, so a new build is loaded once and an
         # unchanged one is skipped. A changed image changes this unit, so
@@ -63,6 +73,9 @@
             "--security-opt=seccomp=unconfined"
           ];
         };
-      };
+      }
+      // lib.optionalAttrs hasNeoSecrets {
+        neo.core.secrets.containerEnv.portrait-server = mkIf (secretEnv != {}) secretEnv;
+      });
     };
 }
