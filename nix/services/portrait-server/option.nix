@@ -14,7 +14,11 @@
           options =
             {
               enabled = mkEnableOption "portrait-server service";
-              telegramBotToken = mkOption {
+              # Secret option (Neo secrets): masked in the web UI; with an
+              # encrypted config the value is a placeholder that is filled
+              # in at activation (see default.nix). Older Neo without
+              # mkSecretOption: a plain option.
+              telegramBotToken = (lib.neo.mkSecretOption or mkOption) {
                 type = types.nullOr types.str;
                 default = null;
                 description = "Telegram bot token";
