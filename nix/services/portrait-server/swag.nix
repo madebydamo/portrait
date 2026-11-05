@@ -22,7 +22,7 @@
           include /config/nginx/proxy.conf;
           include /config/nginx/resolver.conf;
           set $upstream_app ${name};
-          set $upstream_port 7999;
+          set $upstream_port ${toString cfg.port};
           set $upstream_proto http;
           proxy_pass $upstream_proto://$upstream_app:$upstream_port;
           ${lib.neo.authBlock config cfg}

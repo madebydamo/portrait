@@ -62,7 +62,7 @@
           environment =
             portraitEnv
             // {
-              ROCKET_PORT = "7999";
+              ROCKET_PORT = toString cfg.port;
               ROCKET_ADDRESS = "0.0.0.0";
               PORTRAIT_SANDBOX_FW = "1";
             };

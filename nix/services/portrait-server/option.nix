@@ -16,6 +16,13 @@
           options =
             {
               enabled = mkEnableOption "portrait-server service${plugin.label}";
+              # Copies behind the VPN share one network namespace, so a second
+              # copy needs its own port.
+              port = mkOption {
+                type = types.port;
+                default = 7999;
+                description = "Port the server listens on inside its container. Change it only when two copies run behind the VPN.";
+              };
               telegramBotToken = mkOption {
                 type = types.nullOr types.str;
                 default = null;
@@ -30,7 +37,7 @@
             // neo.mkVpnOptions {
               containers = [name];
               networks = ["internal"];
-              ports = [7999];
+              ports = [config.neo.services.${name}.port];
               enabled = true;
             }
             // neo.mkReverseProxyOptions {
@@ -39,7 +46,7 @@
             }
             // lib.neo.mkContainerDefinitions {
               # Built by this flake and loaded (and tagged ${name}:<hash>) by ${name}-image.service.
-              ${name} = "${name}:${image.imageTag}";
+              ${name} = "${name}:${builtins.unsafeDiscardStringContext image.imageTag}";
               extraUnits = ["${name}-image"];
             }
             // lib.neo.mkServiceMeta {
