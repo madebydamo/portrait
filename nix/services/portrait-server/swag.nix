@@ -1,13 +1,15 @@
 # Portrait-server reverse proxy configuration for SWAG.
 {...}: {
-  flake.modules.nixos.portrait-server-swag = {
+  neoPlugin.modules.portrait-server-swag = {
     config,
     lib,
+    plugin,
     ...
   }: let
-    cfg = config.neo.services.portrait-server;
+    name = plugin.name "portrait-server";
+    cfg = config.neo.services.${name};
   in {
-    config.neo.services.portrait-server.proxyConf = lib.mkDefault ''
+    config.neo.services.${name}.proxyConf = lib.mkDefault ''
       server {
         include /config/nginx/listen-https.conf;
         http2 on;
@@ -19,7 +21,7 @@
         location / {
           include /config/nginx/proxy.conf;
           include /config/nginx/resolver.conf;
-          set $upstream_app portrait-server;
+          set $upstream_app ${name};
           set $upstream_port 7999;
           set $upstream_proto http;
           proxy_pass $upstream_proto://$upstream_app:$upstream_port;
