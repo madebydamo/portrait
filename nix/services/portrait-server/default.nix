@@ -17,8 +17,8 @@
       };
       image = withSystem pkgs.stdenv.hostPlatform.system ({config, ...}: config.packages.portrait-server-image);
       docker = "${config.virtualisation.docker.package}/bin/docker";
-      # Every copy tags the image under its own name, so one copy's cleanup never
-      # removes the image another copy is about to start.
+      # Every copy loads the image under its own name, so one copy's cleanup
+      # never removes the image of another.
       localRef = "${name}:${image.imageTag}";
     in {
       config = mkIf cfg.enabled {
@@ -35,16 +35,11 @@
             RemainAfterExit = true;
           };
           script = ''
+            # Loaded straight under this copy's name: another copy never sees
+            # (or removes) this tag.
             if ! ${docker} image inspect ${localRef} >/dev/null 2>&1; then
-              if ! ${docker} image inspect ${image.imageRefUnsafe} >/dev/null 2>&1; then
-                ${image.copyToDockerDaemon}/bin/copy-to-docker-daemon
-              fi
-              ${docker} tag ${image.imageRefUnsafe} ${localRef}
+              ${image.copyTo}/bin/copy-to docker-daemon:${localRef}
             fi
-            ${optionalString (localRef != image.imageRefUnsafe) ''
-              # Only the tag; the image stays under ${localRef}.
-              ${docker} rmi ${image.imageRefUnsafe} >/dev/null 2>&1 || true
-            ''}
             # Drop this copy's superseded builds. One still used by the running
             # container is refused here and removed on the next run.
             ${docker} image ls ${name} --format '{{.Repository}}:{{.Tag}}' \
