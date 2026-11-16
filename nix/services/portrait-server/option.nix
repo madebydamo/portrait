@@ -102,12 +102,9 @@
               privacy = [];
               projectUrl = "https://damianmoser.ch/";
               githubUrl = "https://github.com/madebydamo/portrait";
-              # The repository has no LICENSE file yet.
               license = {
-                spdx = "NONE";
-                url = "https://github.com/madebydamo/portrait";
-                openSource = false;
-                note = "The code is public on GitHub but has no license yet, so others may not reuse it.";
+                spdx = "MIT";
+                url = "https://github.com/madebydamo/portrait/blob/master/LICENSE";
               };
             }
             // lib.neo.mkSkillOptions {};
