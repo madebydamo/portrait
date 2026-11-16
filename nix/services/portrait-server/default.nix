@@ -1,4 +1,6 @@
 # Portrait-server service implementation.
+# One container on its own network (app-<name>); with the VPN on (the default)
+# it runs in gluetun's network namespace and gluetun answers for its name there.
 {withSystem, ...}: {
   neoPlugin.modules.portrait-server = {
     config,
@@ -11,10 +13,6 @@
       # "portrait-server", or "<prefix>-portrait-server" for a prefixed copy.
       name = plugin.name "portrait-server";
       cfg = config.neo.services.${name};
-      portraitEnv = lib.filterAttrs (_: v: v != null && v != "") {
-        TELEGRAM_BOT_TOKEN = cfg.telegramBotToken;
-        TELEGRAM_CHAT_ID = cfg.telegramChatId;
-      };
       image = withSystem pkgs.stdenv.hostPlatform.system ({config, ...}: config.packages.portrait-server-image);
       docker = "${config.virtualisation.docker.package}/bin/docker";
       # Every copy loads the image under its own name, so one copy's cleanup
@@ -53,16 +51,29 @@
           after = ["${name}-image.service"];
         };
 
+        # The bot token reaches the container through a rendered env file,
+        # never the Nix store.
+        neo.core.secrets.containerEnv.${name} = optionalAttrs (lib.neo.isSet cfg.telegramBotToken) {
+          TELEGRAM_BOT_TOKEN = cfg.telegramBotToken;
+        };
+
         virtualisation.oci-containers.containers.${name} = {
+          image = cfg.containers.${name};
+          networks = [(lib.neo.docker.serviceNetwork name)];
           environment =
-            portraitEnv
-            // {
+            {
               ROCKET_PORT = toString cfg.port;
               ROCKET_ADDRESS = "0.0.0.0";
+              # Fail closed: no sandbox without its egress firewall.
               PORTRAIT_SANDBOX_FW = "1";
+              TZ = config.neo.core.timeZone;
+            }
+            // optionalAttrs (lib.neo.isSet cfg.telegramChatId) {
+              TELEGRAM_CHAT_ID = cfg.telegramChatId;
             };
-          image = cfg.containers.${name};
-          autoStart = true;
+          # SYS_ADMIN + seccomp=unconfined: bwrap's namespaces. NET_ADMIN: the
+          # sandbox firewall (iptables + nftables) in the shared VPN namespace.
+          # The sandboxed shell itself drops every capability (setpriv).
           capabilities = {
             SYS_ADMIN = true;
             NET_ADMIN = true;
