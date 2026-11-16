@@ -25,6 +25,7 @@
         util-linux # prlimit, setpriv
         bubblewrap
         iptables
+        nftables # sandbox firewall table gluetun never rewrites (apply-sandbox-fw.sh)
         gnugrep
         gnused
         gawk

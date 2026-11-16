@@ -165,10 +165,23 @@ Terminal.prototype.loadCommand = async function (command) {
 
         this.output.appendChild(commandOutput);
       } else {
-        // Command not found or error
+        // Refused (too many commands, terminal busy) or another error. The
+        // server and the proxy's rate limit answer with a reason when they can.
+        let reason = "";
+        try {
+          const data = await response.json();
+          reason = data.stderr || "";
+        } catch (_) {
+          if (response.status === 429) {
+            reason = "Slow down a little: too many commands, try again in a few seconds";
+          }
+        }
         const errorOutput = document.createElement("div");
         errorOutput.classList.add("output-container");
-        errorOutput.innerHTML = `<p class="output">bash: ${command}: command not found</p>`;
+        const p = document.createElement("p");
+        p.classList.add("output");
+        p.textContent = reason || `bash: ${command}: command not found`;
+        errorOutput.appendChild(p);
         this.output.appendChild(errorOutput);
       }
     } catch (error) {

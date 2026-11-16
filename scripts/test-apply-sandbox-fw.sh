@@ -7,6 +7,30 @@ ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 SCRIPT="$ROOT/scripts/apply-sandbox-fw.sh"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+# nft mock: `nft -f -` stores the ruleset, `nft list chain inet <t> output`
+# prints it. MOCK_IPTABLES_DENY fails it like iptables.
+write_nft_mock() {
+  cat >"$1/nft" <<'MOCK'
+#!/bin/sh
+set -eu
+dir="${MOCK_IPTABLES_STATE:?}/nft"
+mkdir -p "$dir"
+if [ "${MOCK_IPTABLES_DENY:-}" = "1" ]; then
+  echo "nft: Operation not permitted" >&2
+  exit 1
+fi
+case "$*" in
+  "-f -") cat >"$dir/ruleset" ;;
+  "list chain inet portrait-sandbox output")
+    [ -s "$dir/ruleset" ] || { echo "Error: No such file or directory" >&2; exit 1; }
+    cat "$dir/ruleset"
+    ;;
+  *) echo "mock-nft: unhandled: $*" >&2; exit 1 ;;
+esac
+MOCK
+  chmod +x "$1/nft"
+}
+
 run_fw() {
   state=$1
   shift
@@ -70,6 +94,7 @@ case "$cmd" in
 esac
 MOCK
   chmod +x "$state/bin/mock-iptables"
+  write_nft_mock "$state/bin"
   for name in iptables iptables-nft iptables-legacy ip6tables ip6tables-nft ip6tables-legacy; do
     ln -sf mock-iptables "$state/bin/$name"
   done
@@ -114,6 +139,45 @@ grep -q 'portrait-sandbox-drop6' "$v6" || fail "missing IPv6 DROP: $(cat "$v6")"
 if grep -q -- '-j ACCEPT' "$v6"; then
   fail "IPv6 must not ACCEPT localhost (::1) or anything else: $(cat "$v6")"
 fi
+
+# --- nftables layer: its own table, DNS-only lo, IPv6 dropped ---
+nft="$state/nft/ruleset"
+[ -s "$nft" ] || fail "no nftables ruleset written"
+grep -q 'hook output' "$nft" || fail "nft chain not on the output hook: $(cat "$nft")"
+grep -q 'meta skuid 999 drop comment "portrait-sandbox-drop"' "$nft" || fail "nft missing uid-999 drop: $(cat "$nft")"
+grep -q 'meta skuid 999 meta nfproto ipv6 drop' "$nft" || fail "nft missing IPv6 drop: $(cat "$nft")"
+if grep 'oifname "lo"' "$nft" | grep -v 'dport 53 accept' | grep -q .; then
+  fail "nft lo accept is not DNS-only: $(grep 'oifname "lo"' "$nft")"
+fi
+# The drop must be the last rule; nothing after it may accept.
+tail_rule=$(grep 'meta skuid' "$nft" | tail -1)
+case "$tail_rule" in *"drop comment \"portrait-sandbox-drop\""*) ;; *) fail "nft drop is not last: $tail_rule" ;; esac
+
+# --- --check: 0 when complete ---
+run_fw "$state" "$SCRIPT" --check >/dev/null 2>&1 || fail "check after install should pass"
+
+# --- --check: 2 when gluetun put its own rule on top of OUTPUT (still closed) ---
+v4="$state/iptables-nft/rules"
+cp "$v4" "$state/v4.bak"
+{ echo "-A OUTPUT -o lo -j ACCEPT"; cat "$state/v4.bak"; } >"$v4"
+set +e
+run_fw "$state" "$SCRIPT" --check >/dev/null 2>&1
+rc=$?
+set -e
+[ "$rc" = 2 ] || fail "check with a foreign rule on top should exit 2, got $rc"
+run_fw "$state" "$SCRIPT" >/dev/null 2>&1 || fail "reinstall after foreign rule failed"
+run_fw "$state" "$SCRIPT" --check >/dev/null 2>&1 || fail "check after reinstall should pass: $(cat "$v4")"
+
+# --- --check: 1 when the nftables table is gone (sandbox open) ---
+mv "$nft" "$state/nft.bak"
+set +e
+run_fw "$state" "$SCRIPT" --check >/dev/null 2>&1
+rc=$?
+set -e
+[ "$rc" = 1 ] || fail "check without the nft table should exit 1, got $rc"
+out=$(run_fw "$state" "$SCRIPT" 2>&1) || fail "nft reinstall exited $?: $out"
+[ -s "$nft" ] || fail "nft table not reinstalled"
+printf '%s\n' "$out" | grep -q 'VPN-only egress installed' || fail "expected log after nft reinstall, got: $out"
 
 # --- rules wiped (Gluetun restored its snapshot): reinstall and log ---
 : >"$v4"
@@ -176,6 +240,7 @@ case "$cmd" in
 esac
 MOCK
 chmod +x "$half/bin/mock-iptables"
+write_nft_mock "$half/bin"
 for name in iptables iptables-nft iptables-legacy ip6tables ip6tables-nft ip6tables-legacy; do
   ln -sf mock-iptables "$half/bin/$name"
 done
